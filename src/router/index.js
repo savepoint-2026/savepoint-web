@@ -27,16 +27,16 @@ const router = createRouter({
 })
 
 // 로그인 여부 체크
-router.beforeEach((to, from, next) => {
-  const isAuthenticated = !!localStorage.getItem('userId')
+// router.beforeEach((to, from, next) => {
+//   const isAuthenticated = !!localStorage.getItem('userId')
 
-  if (to.path !== '/login' && !isAuthenticated) {
-    next('/login')
-  } else if (to.path === '/login' && isAuthenticated) {
-    next('/')
-  } else {
-    next()
-  }
-})
+//   if (to.path !== '/login' && !isAuthenticated) {
+//     next('/login')
+//   } else if (to.path === '/login' && isAuthenticated) {
+//     next('/')
+//   } else {
+//     next()
+//   }
+// })
 
 export default router
