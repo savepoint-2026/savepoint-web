@@ -1,16 +1,24 @@
 <template>
   <div class="input-field">
     <span class="fw-black" :style="{ width: `${labelWidth}px` }">{{ label }}</span>
-    <input :type="type" class="bg-black-3 fw-bold text-black-1" />
+    <input
+      :type="type"
+      class="bg-black-3 fw-bold text-black-1"
+      :value="data"
+      @input="emit('value-change', $event.target.value)"
+    />
   </div>
 </template>
 
 <script setup>
-const { label, type } = defineProps({
+const { label, labelWidth, type, data } = defineProps({
   label: String,
   labelWidth: Number,
   type: String,
+  data: String,
 })
+
+const emit = defineEmits(['value-change'])
 </script>
 
 <style scoped>
