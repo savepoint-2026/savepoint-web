@@ -2,6 +2,11 @@ body {
   margin: 0;
 }
 
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
 .box-default {
   background-color: white;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.07);

@@ -1,11 +1,11 @@
 <template>
   <nav class="sidebar">
     <div class="profile-menu">
-      <ProfileCard />
+      <router-link to="/profile"><ProfileCard /></router-link>
       <MenuList />
     </div>
     <div class="add-logo">
-      <AddButton />
+      <router-link to="/add"><AddButton /></router-link>
       <img :src="LogoImage" width="209" height="40" />
     </div>
   </nav>

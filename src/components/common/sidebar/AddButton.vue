@@ -11,7 +11,7 @@ import LogoImage from '@/assets/icons/plus-blue.png'
 
 <style scoped>
 button {
-  width: 100%;
+  width: 255px;
   height: 44px;
   display: flex;
   gap: 14px;

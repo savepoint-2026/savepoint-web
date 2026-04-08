@@ -1,8 +1,14 @@
 <template>
-  <li class="non-selected">
-    <img :src="Icons[id]" width="20" height="20" />
-    <span>{{ menuLabel[id] }}</span>
-  </li>
+  <router-link :to="routeName[id]">
+    <li :class="currentRoute.fullPath === routeName[id] ? 'selected' : 'non-selected'">
+      <img
+        :src="currentRoute.fullPath === routeName[id] ? blackIcons[id] : icons[id]"
+        width="20"
+        height="20"
+      />
+      <span>{{ menuLabel[id] }}</span>
+    </li>
+  </router-link>
 </template>
 
 <script setup>
@@ -14,14 +20,18 @@ import SummaryIconBlack from '@/assets/icons/sidebar/sidebar-summary-black.png'
 import SummaryIcon from '@/assets/icons/sidebar/sidebar-summary.png'
 import GroupIconBlack from '@/assets/icons/sidebar/sidebar-race-black.png'
 import GroupIcon from '@/assets/icons/sidebar/sidebar-race.png'
+import { useRoute } from 'vue-router'
 
 const menuLabel = ['메인 대시보드', '거래 내역 조회', '월별 재정 요약', '소비 레이스']
-const BlackIcons = [MainIconBlack, TransIconBlack, SummaryIconBlack, GroupIconBlack]
-const Icons = [MainIcon, TransIcon, SummaryIcon, GroupIcon]
+const blackIcons = [MainIconBlack, TransIconBlack, SummaryIconBlack, GroupIconBlack]
+const icons = [MainIcon, TransIcon, SummaryIcon, GroupIcon]
+const routeName = ['/', '/transactions', '/summary', '/groups']
 
 const { id } = defineProps({
   id: Number,
 })
+
+const currentRoute = useRoute()
 </script>
 
 <style scoped>
