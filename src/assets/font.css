@@ -1,0 +1,35 @@
+@import url('https://cdn.jsdelivr.net/npm/pretendard/dist/web/static/pretendard.css');
+
+:root {
+  --font-base: 'Pretendard', sans-serif;
+}
+
+html,
+body,
+input,
+textarea,
+button {
+  font-family: var(--font-base);
+}
+
+.fw-thin {
+  font-weight: 100;
+}
+.fw-light {
+  font-weight: 300;
+}
+.fw-regular {
+  font-weight: 400;
+}
+.fw-medium {
+  font-weight: 500;
+}
+.fw-semibold {
+  font-weight: 600;
+}
+.fw-bold {
+  font-weight: 700;
+}
+.fw-black {
+  font-weight: 900;
+}
