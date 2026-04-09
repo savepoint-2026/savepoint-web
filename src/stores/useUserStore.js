@@ -17,6 +17,7 @@ export const useUserStore = defineStore('user', {
     },
 
     loadUserData(userId) {
+      this.loading = true
       const userUrl = `/api/users/${userId}`
       const goalUrl = `/api/goals?userId=${userId}`
 
@@ -34,6 +35,7 @@ export const useUserStore = defineStore('user', {
             .get(goalUrl, { timeout: 900 })
             .then((response) => {
               const data = {
+                id: response.data[0].id,
                 itemName: response.data[0].itemName,
                 targetAmount: response.data[0].targetAmount,
               }
@@ -48,6 +50,21 @@ export const useUserStore = defineStore('user', {
         .catch((e) => {
           console.log(e)
         })
+    },
+
+    updateUserData(key, value) {
+      if (key === 'expenseLimit') value = Number(value)
+      this.userModifyData = { ...this.userModifyData, [key]: value }
+    },
+
+    updateGoalData(key, value) {
+      if (key === 'targetAmount') value = Number(value)
+      this.goalModifyData = { ...this.goalModifyData, [key]: value }
+    },
+
+    initModifyData() {
+      this.userModifyData = this.userData
+      this.goalModifyData = this.goalData
     },
   },
 })

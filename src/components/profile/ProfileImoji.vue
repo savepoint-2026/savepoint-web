@@ -3,16 +3,34 @@
     {{
       userStore.isModifying ? userStore.userModifyData.profileImg : userStore.userData.profileImg
     }}
-    <ModifyImoji v-if="userStore.isModifying" />
+    <ModifyImoji v-if="userStore.isModifying" @open-picker="togglePicker" />
+    <div v-if="isPickerOpen" class="picker-wrapper">
+      <EmojiPicker :native="true" @select="onSelectEmoji" />
+    </div>
   </div>
 </template>
 
 <script setup>
 import ModifyImoji from './ModifyImoji.vue'
+import EmojiPicker from 'vue3-emoji-picker'
+import 'vue3-emoji-picker/css'
 
+import { ref } from 'vue'
 import { useUserStore } from '@/stores/useUserStore'
 
 const userStore = useUserStore()
+
+const isPickerOpen = ref(false)
+
+const togglePicker = () => {
+  isPickerOpen.value = !isPickerOpen.value
+}
+
+const onSelectEmoji = (emoji) => {
+  userStore.updateUserData('profileImg', emoji.i)
+
+  isPickerOpen.value = false
+}
 </script>
 
 <style scoped>
@@ -26,5 +44,18 @@ const userStore = useUserStore()
 
   font-size: 96px;
   position: relative;
+}
+
+/* picker 위치 조정 */
+.picker-wrapper {
+  position: absolute;
+  top: 200px;
+  left: 0;
+  z-index: 10;
+}
+
+.picker-wrapper :deep(h5.v3-sticky) {
+  font-size: 14px !important;
+  line-height: 1.2;
 }
 </style>

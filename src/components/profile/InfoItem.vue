@@ -6,8 +6,9 @@
     </div>
     <ProfileInput
       v-if="userStore.isModifying && id !== 1"
-      :data="contents[id]"
+      :data="userStore.userModifyData[contents[id]]"
       :type="id ? 'number' : 'text'"
+      @value-change="(data) => userStore.updateUserData(contents[id], data)"
     />
     <p class="text-black-1 fw-black" v-else>
       {{

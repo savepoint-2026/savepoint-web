@@ -1,11 +1,13 @@
 <template>
-  <div class="bg-yellow-1 justify-align">
+  <div class="bg-yellow-1 justify-align" @click="emit('open-picker')">
     <img :src="Modify" width="20" height="20" />
   </div>
 </template>
 
 <script setup>
 import Modify from '@/assets/icons/mypage/mypage-modify-profile.png'
+
+const emit = defineEmits(['open-picker'])
 </script>
 
 <style scoped>

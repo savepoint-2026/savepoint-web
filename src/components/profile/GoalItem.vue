@@ -4,10 +4,13 @@
       <img :src="Goal" width="18" height="18" />
       <span class="text-black-2 fw-bold">나의 절약 목표</span>
     </div>
-    <div class="goal-content bg-black-4 text-black-1 fw-black">
-      {{
-        `${userStore.goalData.targetAmount.toLocaleString()} &#8361의 ${userStore.goalData.itemName}을(를) 나에게 선물하겠다!`
-      }}
+    <div class="goal-content bg-black-4">
+      <GoalModify v-if="userStore.isModifying" />
+      <span class="text-black-1 fw-black" v-else>
+        {{
+          `${userStore.goalData.targetAmount.toLocaleString()} &#8361의 ${userStore.goalData.itemName}을(를) 나에게 선물하겠다!`
+        }}
+      </span>
     </div>
   </div>
 </template>
@@ -16,6 +19,7 @@
 import Goal from '@/assets/icons/mypage/mypage-goal.png'
 
 import { useUserStore } from '@/stores/useUserStore'
+import GoalModify from './GoalModify.vue'
 
 const userStore = useUserStore()
 </script>
@@ -36,7 +40,7 @@ const userStore = useUserStore()
   gap: 8px;
 }
 
-span {
+.label-box span {
   font-size: 14px;
 }
 
@@ -49,6 +53,9 @@ span {
   display: flex;
   align-items: center;
   border: 1px solid var(--black-3);
+}
+
+.goal-content span {
   font-size: 20px;
 }
 </style>

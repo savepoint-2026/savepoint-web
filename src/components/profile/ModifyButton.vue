@@ -15,8 +15,11 @@
 import Cancel from '@/assets/icons/mypage/mypage-cancel.png'
 import Modify from '@/assets/icons/mypage/mypage-modify.png'
 
+import { useAuthStore } from '@/stores/useAuthStore'
 import { useUserStore } from '@/stores/useUserStore'
+import axios from 'axios'
 
+const authStore = useAuthStore()
 const userStore = useUserStore()
 
 const { id } = defineProps({
@@ -25,14 +28,44 @@ const { id } = defineProps({
 
 const onModifyClick = () => {
   if (userStore.isModifying) {
-    console.log('modifying')
+    const result = {}
+
+    for (const key in userStore.userModifyData) {
+      if (userStore.userData[key] !== userStore.userModifyData[key]) {
+        result[key] = userStore.userModifyData[key]
+      }
+    }
+
+    const userURI = `/api/users/${authStore.currentUserId}`
+    const goalURI = `/api/goals/${userStore.goalData.id}`
+
+    axios
+      .patch(userURI, result)
+      .then(() => {
+        axios
+          .patch(goalURI, userStore.goalModifyData)
+          .then(() => {
+            userStore.changeModifyMode(false)
+            userStore.loadUserData(authStore.currentUserId)
+          })
+          .catch((e) => console.error(e))
+      })
+      .catch((e) => console.error(e))
   } else {
     userStore.changeModifyMode(true)
   }
 }
 
 const onCancelClick = () => {
-  userStore.changeModifyMode(false)
+  if (
+    userStore.userData != userStore.userModifyData ||
+    userStore.goalData != userStore.goalModifyData
+  ) {
+    if (confirm('수정 사항이 있습니다. 취소하시겠습니까?')) {
+      userStore.initModifyData()
+      userStore.changeModifyMode(false)
+    }
+  } else userStore.changeModifyMode(false)
 }
 </script>
 
