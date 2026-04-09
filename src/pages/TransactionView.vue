@@ -1,11 +1,8 @@
 <template>
   <div class="transaction-view">
     <div class="left-panel">
-      <!-- TODO: 필터 기능 구현 후 연결 -->
-      <!-- <FilterBar /> -->
-      <div class="placeholder filter-placeholder box-default justify-align text-black-2 fw-medium">
-        필터 영역
-      </div>
+      <FilterBar />
+
       <CalendarGrid />
     </div>
     <div class="right-panel">
@@ -15,7 +12,7 @@
 </template>
 
 <script setup>
-// import FilterBar from '@/components/calendar/FilterBar.vue'
+import FilterBar from '@/components/calendar/FilterBar.vue'
 import CalendarGrid from '@/components/calendar/CalendarGrid.vue'
 import TransactionList from '@/components/calendar/TransactionList.vue'
 </script>

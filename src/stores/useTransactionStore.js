@@ -14,17 +14,21 @@ export const useTransactionStore = defineStore('transaction', {
   }),
 
   getters: {
-    // 1. 선택된 날짜 필터링
-    dailyTransactions: (state) => {
-      return state.transactions.filter(
-        (tx) => dayjs(tx.date).format('YYYY-MM-DD') === state.selectedDate,
-      )
+    // 필터링: 선택된 유형(수입/지출)과 카테고리에 맞게 데이터 걸러내기
+    filteredTransactions: (state) => {
+      return state.transactions.filter((tx) => {
+        const isTypeMatch = state.filterType === 'all' || tx.type === state.filterType
+        const isCategoryMatch =
+          state.filterCategory === 'all' || tx.categoryId === state.filterCategory
+
+        return isTypeMatch && isCategoryMatch
+      })
     },
 
-    // 2. 날짜별 합계 데이터 (달력 날짜칸에 수입/지출 표시)
+    // 날짜별 합계 데이터 (달력 날짜칸에 수입/지출 표시)
     // 결과: { "2026-04-08": {income: 50000, expense: 12000}, ...}
-    aggregatedByDate: (state) => {
-      return state.transactions.reduce((acc, tx) => {
+    aggregatedByDate(state) {
+      return this.filteredTransactions.reduce((acc, tx) => {
         const dateKey = dayjs(tx.date).format('YYYY-MM-DD')
 
         if (!acc[dateKey]) {
@@ -37,6 +41,13 @@ export const useTransactionStore = defineStore('transaction', {
 
         return acc
       }, {})
+    },
+
+    // 선택된 날짜 필터링
+    dailyTransactions(state) {
+      return this.filteredTransactions.filter(
+        (tx) => dayjs(tx.date).format('YYYY-MM-DD') === state.selectedDate,
+      )
     },
   },
 
