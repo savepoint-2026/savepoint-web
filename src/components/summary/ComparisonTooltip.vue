@@ -1,6 +1,5 @@
 ﻿<script setup>
 import { computed } from 'vue'
-
 const props = defineProps({
   comparison: {
     type: Object,
@@ -24,8 +23,8 @@ const summary = computed(() => {
 <template>
   <div
     class="comparison-tooltip"
-    :class="{ 'comparison-tooltip--active': comparison }"
-    :style="{ left: `${position.x}px`, top: `${position.y}px` }"
+    :class="{ 'comparison-tooltip--active': props.comparison }"
+    :style="{ left: `${props.position.x}px`, top: `${props.position.y}px` }"
   >
     <div class="comparison-tooltip__icon">!</div>
 

@@ -1,5 +1,8 @@
 ﻿<script setup>
 import { computed, onMounted, ref } from 'vue'
+import axios from 'axios'
+import dayjs from 'dayjs'
+import { useTransactionStore } from '@/stores/useTransactionStore'
 import TrendBarChart from '@/components/summary/TrendBarChart.vue'
 import CategoryDonutChart from '@/components/summary/CategoryDonutChart.vue'
 import ComparisonTooltip from '@/components/summary/ComparisonTooltip.vue'
@@ -27,18 +30,18 @@ const metricTypes = [
   { label: '순이익', value: 'net' },
 ]
 
+const categoryStoreUrl = 'http://localhost:3000/categories'
+
+const transactionStore = useTransactionStore()
 const categories = ref([])
-const transactions = ref([])
-const loading = ref(false)
-const selectedMetric = ref('all')
-const highlightedCategoryId = ref(null)
 const tooltipCategoryId = ref(null)
-const selectedMonthKey = ref('')
-const tooltipPosition = ref({ x: 0, y: 0 })
 const summaryViewRef = ref(null)
+const selectedMetric = ref('all')
+const selectedMonthKey = ref(dayjs().format('YYYY-MM'))
+const highlightedCategoryId = ref(null)
+const tooltipPosition = ref({ x: 0, y: 0 })
 
 const parseMonthKey = (dateString) => String(dateString).slice(0, 7)
-const parseDate = (dateString) => new Date(`${dateString}T00:00:00`)
 const shortMonthLabel = (monthKey) => `${Number(monthKey.split('-')[1])}월`
 
 const shiftMonthKey = (monthKey, diff) => {
@@ -48,6 +51,16 @@ const shiftMonthKey = (monthKey, diff) => {
 }
 
 const currentUserId = computed(() => window.localStorage.getItem('userId') || FALLBACK_USER_ID)
+const loading = computed(() => transactionStore.rangeLoading)
+const transactions = computed(() => transactionStore.rangeTransactions)
+const latestRangeMonthKey = computed(() => {
+  if (!transactions.value.length) return dayjs().format('YYYY-MM')
+
+  return transactions.value.reduce((latestMonthKey, tx) => {
+    const monthKey = parseMonthKey(tx.date)
+    return monthKey > latestMonthKey ? monthKey : latestMonthKey
+  }, parseMonthKey(transactions.value[0].date))
+})
 
 const getMonthlyAmountByType = (monthKey, type) =>
   transactions.value
@@ -191,34 +204,33 @@ const handleLeaveHighlightCategory = () => {
 }
 
 const fetchSummaryData = async () => {
-  loading.value = true
+  const end = dayjs().endOf('month').format('YYYY-MM-DD')
+  const start = dayjs(end).subtract(2, 'month').startOf('month').format('YYYY-MM-DD')
 
   try {
-    const response = await fetch('/db.json')
-    if (!response.ok) {
-      throw new Error('db.json request failed')
-    }
+    const [categoryRes] = await Promise.all([
+      axios.get(categoryStoreUrl),
+      transactionStore.fetchRangeTransactions(currentUserId.value, start, end),
+    ])
 
-    const data = await response.json()
+    categories.value = Array.isArray(categoryRes.data) ? categoryRes.data : []
 
-    categories.value = Array.isArray(data.categories) ? data.categories : []
-    transactions.value = Array.isArray(data.transactions)
-      ? data.transactions
-          .filter((tx) => tx.userId === currentUserId.value)
-          .sort((a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime())
-      : []
-
-    if (transactions.value.length > 0) {
-      selectedMonthKey.value = parseMonthKey(transactions.value[transactions.value.length - 1].date)
+    if (transactionStore.rangeTransactions.length > 0) {
+      selectedMonthKey.value = latestRangeMonthKey.value
+    } else {
+      selectedMonthKey.value = dayjs().format('YYYY-MM')
     }
   } catch (error) {
     console.error('summary data load failed', error)
-  } finally {
-    loading.value = false
   }
 }
 
-onMounted(fetchSummaryData)
+onMounted(() => {
+  selectedMetric.value = 'all'
+  highlightedCategoryId.value = null
+  tooltipPosition.value = { x: 0, y: 0 }
+  fetchSummaryData()
+})
 </script>
 
 <template>
@@ -255,11 +267,15 @@ onMounted(fetchSummaryData)
             <p class="monthly-summary-card__title">월간 요약</p>
             <div class="monthly-summary-card__metric">
               <span class="monthly-summary-card__label">INCOME</span>
-              <strong class="monthly-summary-card__income">+{{ formatCurrency(item.income) }}</strong>
+              <strong class="monthly-summary-card__income"
+                >+{{ formatCurrency(item.income) }}</strong
+              >
             </div>
             <div class="monthly-summary-card__metric">
               <span class="monthly-summary-card__label">EXPENSE</span>
-              <strong class="monthly-summary-card__expense">-{{ formatCurrency(item.expense) }}</strong>
+              <strong class="monthly-summary-card__expense"
+                >-{{ formatCurrency(item.expense) }}</strong
+              >
             </div>
           </article>
         </div>
@@ -268,8 +284,8 @@ onMounted(fetchSummaryData)
       <section class="summary-content__right">
         <CategoryDonutChart
           :items="selectedMonthExpenseCategories"
-          :month-label="selectedMonthKey"
           :active-category-id="highlightedCategoryId"
+          :month-label="selectedMonthKey"
           @hover-category="handleHoverCategory"
           @leave-category="handleLeaveCategory"
         />
@@ -293,7 +309,10 @@ onMounted(fetchSummaryData)
             <strong class="category-row__amount">-{{ formatCurrency(item.amount) }}</strong>
           </div>
 
-          <p v-if="!selectedMonthExpenseCategories.length && !loading" class="category-list-card__empty">
+          <p
+            v-if="!selectedMonthExpenseCategories.length && !loading"
+            class="category-list-card__empty"
+          >
             해당 월에 등록된 지출 내역이 없어요.
           </p>
           <p v-if="loading" class="category-list-card__empty">데이터를 불러오는 중입니다.</p>
@@ -451,7 +470,9 @@ onMounted(fetchSummaryData)
   padding: 13px 12px;
   border-radius: 18px;
   background: #ffffff;
-  transition: background-color 0.18s ease, transform 0.18s ease;
+  transition:
+    background-color 0.18s ease,
+    transform 0.18s ease;
 }
 
 .category-row + .category-row {

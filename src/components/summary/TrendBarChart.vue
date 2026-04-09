@@ -79,7 +79,7 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
       <div>
         <h2 class="trend-card__title">월별 소비 추이</h2>
         <p class="trend-card__description">
-          {{ descriptionMap[selectedMetric] ?? descriptionMap.all }}
+          {{ descriptionMap[props.selectedMetric] ?? descriptionMap.all }}
         </p>
       </div>
 

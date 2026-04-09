@@ -8,13 +8,13 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
-  monthLabel: {
-    type: String,
-    default: '',
-  },
   activeCategoryId: {
     type: String,
     default: null,
+  },
+  monthLabel: {
+    type: String,
+    default: '',
   },
 })
 
@@ -23,10 +23,7 @@ const totalAmount = computed(() =>
 )
 
 const activeItem = computed(
-  () =>
-    props.items.find((item) => item.categoryId === props.activeCategoryId) ??
-    props.items[0] ??
-    null,
+  () => props.items.find((item) => item.categoryId === props.activeCategoryId) ?? props.items[0] ?? null,
 )
 
 const activeShare = computed(() => {
@@ -136,7 +133,7 @@ const emitHoverCategory = (categoryId, event) => {
           v-for="item in items"
           :key="item.categoryId"
           class="donut-card__legend-item"
-          :class="{ 'donut-card__legend-item--active': item.categoryId === activeCategoryId }"
+          :class="{ 'donut-card__legend-item--active': item.categoryId === props.activeCategoryId }"
         >
           <span class="donut-card__swatch" :style="{ backgroundColor: item.color }" />
           <span class="donut-card__legend-label">{{ item.name }}</span>
