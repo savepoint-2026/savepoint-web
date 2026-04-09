@@ -9,6 +9,8 @@ import GroupRaceView from '@/pages/GroupRaceView.vue'
 import NotFoundView from '@/pages/NotFoundView.vue'
 import UserProfileView from '@/pages/UserProfileView.vue'
 
+import { useAuthStore } from '@/stores/useAuthStore'
+
 const routes = [
   { path: '/', name: 'Dashboard', component: DashboardView },
   { path: '/login', name: 'Login', component: LoginView },
@@ -28,11 +30,11 @@ const router = createRouter({
 
 // 로그인 여부 체크
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = !!localStorage.getItem('userId')
+  const authStore = useAuthStore()
 
-  if (to.path !== '/login' && !isAuthenticated) {
+  if (to.path !== '/login' && !authStore.isLogged) {
     next('/login')
-  } else if (to.path === '/login' && isAuthenticated) {
+  } else if (to.path === '/login' && authStore.isLogged) {
     next('/')
   } else {
     next()
