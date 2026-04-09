@@ -6,6 +6,7 @@
     </div>
     <div class="goal-content bg-black-4">
       <GoalModify v-if="userStore.isModifying" />
+      <AddAlertButton :label="'목표'" v-else-if="Object.keys(userStore.goalData).length === 0" />
       <span class="text-black-1 fw-black" v-else>
         {{
           `${Number(userStore.goalData.targetAmount).toLocaleString()} &#8361의 ${userStore.goalData.itemName}을(를) 나에게 선물하겠다!`
@@ -20,6 +21,7 @@ import Goal from '@/assets/icons/mypage/mypage-goal.png'
 
 import { useUserStore } from '@/stores/useUserStore'
 import GoalModify from './GoalModify.vue'
+import AddAlertButton from './AddAlertButton.vue'
 
 const userStore = useUserStore()
 </script>

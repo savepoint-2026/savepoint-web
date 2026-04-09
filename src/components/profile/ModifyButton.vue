@@ -37,18 +37,36 @@ const onModifyClick = () => {
     }
 
     const userURI = `/api/users/${authStore.currentUserId}`
-    const goalURI = `/api/goals/${userStore.goalData.id}`
+    const goalURI = `/api/goals`
 
     axios
       .patch(userURI, result)
       .then(() => {
-        axios
-          .patch(goalURI, userStore.goalModifyData)
-          .then(() => {
-            userStore.changeModifyMode(false)
-            userStore.loadUserGoalData(authStore.currentUserId)
-          })
-          .catch((e) => console.error(e))
+        if (userStore.goalModifyData.itemName && userStore.goalModifyData.targetAmount) {
+          if (userStore.goalData.id) {
+            axios
+              .patch(`${goalURI}/${userStore.goalData.id}`, userStore.goalModifyData)
+              .then(() => {
+                userStore.changeModifyMode(false)
+                userStore.loadUserGoalData(authStore.currentUserId)
+              })
+              .catch((e) => console.error(e))
+          } else {
+            userStore.updateGoalData('achieved', false)
+            userStore.updateGoalData('userId', authStore.currentUserId)
+            axios
+              .post(goalURI, userStore.goalModifyData)
+              .then(() => {
+                userStore.changeModifyMode(false)
+                userStore.loadUserGoalData(authStore.currentUserId)
+              })
+              .catch((e) => console.error(e))
+          }
+        } else {
+          userStore.changeModifyMode(false)
+          userStore.loadUserGoalData(authStore.currentUserId)
+          console.log(userStore.goalData)
+        }
       })
       .catch((e) => console.error(e))
   } else {

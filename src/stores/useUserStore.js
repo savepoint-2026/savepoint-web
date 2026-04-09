@@ -57,11 +57,15 @@ export const useUserStore = defineStore('user', {
           axios
             .get(goalUrl, { timeout: 900 })
             .then((response) => {
-              const data = {
-                id: response.data[0].id,
-                itemName: response.data[0].itemName,
-                targetAmount: response.data[0].targetAmount,
+              let data = {}
+              if (response.data.length) {
+                data = {
+                  id: response.data[0].id,
+                  itemName: response.data[0].itemName,
+                  targetAmount: response.data[0].targetAmount,
+                }
               }
+
               this.goalData = data
               this.goalModifyData = data
               this.loading = false

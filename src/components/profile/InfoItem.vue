@@ -10,6 +10,7 @@
       :type="id ? 'number' : 'text'"
       @value-change="(data) => userStore.updateUserData(contents[id], data)"
     />
+    <AddAlertButton :label="'한도'" v-else-if="id === 2 && !userStore.userData.expenseLimit" />
     <p class="text-black-1 fw-black" v-else>
       {{
         id === 2
@@ -18,7 +19,10 @@
       }}
       {{ id === 2 ? '&#8361' : '' }}
     </p>
-    <hr class="bg-black-3" v-if="!userStore.isModifying || id === 1" />
+    <hr
+      class="bg-black-3"
+      v-if="(!userStore.isModifying || id === 1) && (id !== 2 || userStore.userData.expenseLimit)"
+    />
   </div>
 </template>
 
@@ -29,6 +33,7 @@ import Limit from '@/assets/icons/mypage/mypage-limit.png'
 
 import { useUserStore } from '@/stores/useUserStore'
 import ProfileInput from './ProfileInput.vue'
+import AddAlertButton from './AddAlertButton.vue'
 
 const { id } = defineProps({
   id: Number,
