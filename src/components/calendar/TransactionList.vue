@@ -1,12 +1,21 @@
 <template>
   <div class="transaction-list box-default">
+    <div class="summary-badges">
+      <div class="badge badge-income">
+        <span class="badge-label fw-medium">수입</span>
+        <span class="badge-amount fw-bold">+{{ totalIncome.toLocaleString("ko-KR") }}</span>
+      </div>
+      <div class="badge badge-expense">
+        <span class="badge-label fw-medium">지출</span>
+        <span class="badge-amount fw-bold">-{{ totalExpense.toLocaleString("ko-KR") }}</span>
+      </div>
+    </div>
     <div class="list-header">
-      <h2 class="section-title fw-bold text-black-1">
-        {{ isFiltered ? selectedDateLabel : "전체 거래 내역" }}
-      </h2>
-      <button v-if="isFiltered" class="reset-btn fw-medium text-black-2" @click="resetFilter">
-        전체 보기
-      </button>
+      <div class="header-left">
+        <img :src="iconHistory" class="header-icon" alt="거래 상세" />
+        <span class="header-title fw-medium text-black-2">거래 상세</span>
+      </div>
+      <span class="header-count fw-regular text-black-2">총 {{ displayedTransactions.length }}건</span>
     </div>
 
     <div v-if="transactionStore.loading" class="empty-msg text-black-2">
@@ -17,84 +26,75 @@
       거래 내역이 없습니다.
     </div>
 
-    <table v-else class="tx-table">
-      <thead>
-        <tr>
-          <th class="fw-semibold text-black-2">날짜</th>
-          <th class="fw-semibold text-black-2">카테고리</th>
-          <th class="fw-semibold text-black-2">금액</th>
-          <th class="fw-semibold text-black-2">메모</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <template v-for="tx in displayedTransactions" :key="tx.id">
-          <tr class="tx-row" @click="toggleSelected(tx.id)">
-            <td class="fw-regular text-black-2">{{ formatDate(tx.date) }}</td>
-            <td>
-              <div class="category-cell">
-                <img
-                  v-if="getCategoryInfo(tx.categoryId).icon"
-                  :src="getCategoryInfo(tx.categoryId).icon"
-                  class="category-icon"
-                  :alt="getCategoryInfo(tx.categoryId).name"
-                />
-                <span class="fw-regular text-black-2">{{ getCategoryInfo(tx.categoryId).name }}</span>
-              </div>
-            </td>
-            <td class="fw-semibold" :class="tx.type === 'income' ? 'text-green-1' : 'text-red-1'">
-              {{ formatAmount(tx.type, tx.amount) }}
-            </td>
-            <td class="fw-regular text-black-2">{{ tx.memo ?? "-" }}</td>
-            <td>
-              <img
-                :src="arrowDown"
-                class="arrow-icon"
-                :class="{ rotated: selectedId === tx.id }"
-                alt="펼치기"
-              />
-            </td>
-          </tr>
-          <tr v-if="selectedId === tx.id" class="action-row">
-            <td colspan="5">
-              <div class="action-buttons">
-                <button class="action-btn edit-btn fw-medium" @click.stop="startEdit(tx)">
-                  수정
-                </button>
-                <button class="action-btn delete-btn fw-medium" @click.stop="deleteTransaction(tx.id)">
-                  삭제
-                </button>
-              </div>
-            </td>
-          </tr>
-          <tr v-if="editingId === tx.id" class="edit-row">
-            <td colspan="5">
-              <div class="edit-form">
-                <input
-                  v-model="editForm.memo"
-                  class="edit-input fw-regular"
-                  placeholder="메모"
-                />
-                <input
-                  v-model.number="editForm.amount"
-                  type="number"
-                  class="edit-input fw-regular"
-                  placeholder="금액"
-                />
-                <div class="edit-actions">
-                  <button class="action-btn edit-btn fw-medium" @click.stop="submitEdit(tx.id)">
-                    저장
-                  </button>
-                  <button class="action-btn fw-medium text-black-2" @click.stop="cancelEdit">
-                    취소
-                  </button>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </template>
-      </tbody>
-    </table>
+    <div v-else class="tx-list">
+      <div
+        v-for="tx in displayedTransactions"
+        :key="tx.id"
+        class="tx-item-wrapper"
+      >
+        <div class="tx-item" @click="toggleSelected(tx.id)">
+          <div class="tx-icon-wrap">
+            <img
+              v-if="getCategoryInfo(tx.categoryId).icon"
+              :src="getCategoryInfo(tx.categoryId).icon"
+              class="category-icon"
+              :alt="getCategoryInfo(tx.categoryId).name"
+            />
+          </div>
+          <div class="tx-info">
+            <span class="tx-memo fw-semibold text-black-1">{{ tx.memo ?? "-" }}</span>
+            <span class="tx-date fw-regular text-black-2">{{ formatDate(tx.date) }}</span>
+          </div>
+          <span
+            class="tx-amount fw-bold"
+            :class="tx.type === 'income' ? 'text-green-1' : 'text-red-1'"
+          >
+            {{ formatAmount(tx.type, tx.amount) }}
+          </span>
+        </div>
+
+        <div v-if="selectedId === tx.id && editingId !== tx.id" class="action-buttons">
+          <button class="action-btn edit-btn fw-medium" @click.stop="startEdit(tx)">수정</button>
+          <button class="action-btn delete-btn fw-medium" @click.stop="deleteTransaction(tx.id)">삭제</button>
+        </div>
+
+        <div v-if="editingId === tx.id" class="edit-form">
+          <div class="edit-row">
+            <label class="edit-label fw-medium text-black-2">카테고리</label>
+            <select v-model="editForm.categoryId" class="edit-select fw-regular">
+              <option
+                v-for="cat in filteredCategories(tx.type)"
+                :key="cat.id"
+                :value="cat.id"
+              >
+                {{ cat.name }}
+              </option>
+            </select>
+          </div>
+          <div class="edit-row">
+            <label class="edit-label fw-medium text-black-2">메모</label>
+            <input
+              v-model="editForm.memo"
+              class="edit-input fw-regular"
+              placeholder="메모"
+            />
+          </div>
+          <div class="edit-row">
+            <label class="edit-label fw-medium text-black-2">금액</label>
+            <input
+              v-model.number="editForm.amount"
+              type="number"
+              class="edit-input fw-regular"
+              placeholder="금액"
+            />
+          </div>
+          <div class="edit-actions">
+            <button class="action-btn cancel-btn fw-medium" @click.stop="cancelEdit">취소</button>
+            <button class="action-btn save-btn fw-medium" @click.stop="submitEdit(tx.id)">저장</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -102,7 +102,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useTransactionStore } from "@/stores/useTransactionStore";
 import dayjs from "dayjs";
-import arrowDown from "@/assets/icons/arrow-down.png";
+import iconHistory from "@/assets/icons/category/category-history.png";
 import iconFood from "@/assets/icons/category/category-food-black.png";
 import iconTrans from "@/assets/icons/category/category-trans-black.png";
 import iconShop from "@/assets/icons/category/category-shop-black.png";
@@ -111,16 +111,22 @@ import iconSalary from "@/assets/icons/category/category-salary-black.png";
 import iconPocket from "@/assets/icons/category/category-pocket-black.png";
 
 const CATEGORY_MAP = {
-  c1: { name: "급여", icon: iconSalary },
-  c2: { name: "용돈", icon: iconPocket },
-  c3: { name: "식비", icon: iconFood },
-  c4: { name: "교통/통신", icon: iconTrans },
-  c5: { name: "쇼핑", icon: iconShop },
-  c6: { name: "문화/여가", icon: iconCulture },
+  c1: { name: "급여", icon: iconSalary, type: "income" },
+  c2: { name: "용돈", icon: iconPocket, type: "income" },
+  c3: { name: "식비", icon: iconFood, type: "expense" },
+  c4: { name: "교통/통신", icon: iconTrans, type: "expense" },
+  c5: { name: "쇼핑", icon: iconShop, type: "expense" },
+  c6: { name: "문화/여가", icon: iconCulture, type: "expense" },
 };
+
+const CATEGORIES = Object.entries(CATEGORY_MAP).map(([id, val]) => ({ id, ...val }));
 
 function getCategoryInfo(categoryId) {
   return CATEGORY_MAP[categoryId] ?? { name: categoryId, icon: null };
+}
+
+function filteredCategories(type) {
+  return CATEGORIES.filter((cat) => cat.type === type);
 }
 
 // TODO: useUserStore 연결 후 실제 userId로 교체
@@ -129,7 +135,7 @@ const DUMMY_USER_ID = "u1";
 const transactionStore = useTransactionStore();
 const selectedId = ref(null);
 const editingId = ref(null);
-const editForm = ref({ memo: "", amount: 0 });
+const editForm = ref({ memo: "", amount: 0, categoryId: "" });
 
 onMounted(async () => {
   const now = dayjs();
@@ -142,10 +148,6 @@ onMounted(async () => {
 
 const isFiltered = computed(() => !!transactionStore.selectedDate);
 
-const selectedDateLabel = computed(() =>
-  dayjs(transactionStore.selectedDate).format("MM월 DD일"),
-);
-
 const displayedTransactions = computed(() => {
   const list = isFiltered.value
     ? transactionStore.dailyTransactions
@@ -153,9 +155,17 @@ const displayedTransactions = computed(() => {
   return [...list].sort((a, b) => dayjs(b.date).valueOf() - dayjs(a.date).valueOf());
 });
 
-function resetFilter() {
-  transactionStore.setSelectedDate(null);
-}
+const totalIncome = computed(() =>
+  displayedTransactions.value
+    .filter((tx) => tx.type === "income")
+    .reduce((sum, tx) => sum + tx.amount, 0),
+);
+
+const totalExpense = computed(() =>
+  displayedTransactions.value
+    .filter((tx) => tx.type === "expense")
+    .reduce((sum, tx) => sum + tx.amount, 0),
+);
 
 function toggleSelected(id) {
   editingId.value = null;
@@ -164,7 +174,7 @@ function toggleSelected(id) {
 
 function startEdit(tx) {
   editingId.value = tx.id;
-  editForm.value = { memo: tx.memo ?? "", amount: tx.amount };
+  editForm.value = { memo: tx.memo ?? "", amount: tx.amount, categoryId: tx.categoryId };
 }
 
 function cancelEdit() {
@@ -175,6 +185,7 @@ async function submitEdit(id) {
   await transactionStore.updateTransaction(id, {
     memo: editForm.value.memo,
     amount: editForm.value.amount,
+    categoryId: editForm.value.categoryId,
   });
   editingId.value = null;
   selectedId.value = null;
@@ -186,41 +197,81 @@ async function deleteTransaction(id) {
 }
 
 function formatDate(date) {
-  return dayjs(date).format("MM.DD");
+  return dayjs(date).format("YYYY. MM. DD");
 }
 
 function formatAmount(type, amount) {
   const sign = type === "income" ? "+" : "-";
-  return `${sign}${amount.toLocaleString("ko-KR")}원`;
+  return `${sign}${amount.toLocaleString("ko-KR")}`;
 }
 </script>
 
 <style scoped>
 .transaction-list {
-  padding: 28px 32px;
+  padding: 24px 20px;
   height: 100%;
   box-sizing: border-box;
   overflow-y: auto;
+}
+
+.summary-badges {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.badge {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0;
+  border-radius: 12px;
+  gap: 2px;
+}
+
+.badge-label {
+  font-size: 12px;
+}
+
+.badge-amount {
+  font-size: 16px;
+}
+
+.badge-income {
+  background-color: var(--green-3);
+  color: #1a7a6e;
+}
+
+.badge-expense {
+  background-color: var(--yellow-2);
+  color: #b87333;
 }
 
 .list-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
 }
 
-.section-title {
-  margin: 0;
-  font-size: 16px;
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.reset-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
+.header-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.header-title {
   font-size: 13px;
-  padding: 0;
+}
+
+.header-count {
+  font-size: 13px;
 }
 
 .empty-msg {
@@ -229,64 +280,79 @@ function formatAmount(type, amount) {
   padding: 24px 0;
 }
 
-.tx-table {
-  width: 100%;
-  border-collapse: collapse;
+.tx-list {
+  display: flex;
+  flex-direction: column;
 }
 
-.tx-table th,
-.tx-table td {
-  padding: 12px 8px;
-  font-size: 14px;
-  text-align: left;
-}
-
-.tx-table th {
-  font-size: 12px;
-  border-bottom: 1px solid var(--black-3);
-}
-
-.tx-row {
-  cursor: pointer;
+.tx-item-wrapper {
   border-top: 1px solid var(--black-3);
 }
 
-.tx-row:hover {
+.tx-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 4px;
+  cursor: pointer;
+}
+
+.tx-item:hover {
   background-color: var(--black-4);
 }
 
-.arrow-icon {
-  width: 14px;
-  height: 14px;
-  transition: transform 0.2s ease;
+.tx-icon-wrap {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.arrow-icon.rotated {
-  transform: rotate(180deg);
+.category-icon {
+  width: 24px;
+  height: 24px;
 }
 
-.action-row td,
-.edit-row td {
-  padding: 8px;
-  background-color: var(--black-4);
+.tx-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.tx-memo {
+  font-size: 15px;
+}
+
+.tx-date {
+  font-size: 12px;
+}
+
+.tx-amount {
+  font-size: 15px;
+  flex-shrink: 0;
 }
 
 .action-buttons {
   display: flex;
   gap: 8px;
-  justify-content: flex-end;
+  padding: 8px 4px 12px;
 }
 
 .action-btn {
-  padding: 6px 16px;
-  border-radius: 8px;
+  flex: 1;
+  padding: 12px 0;
   border: none;
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .edit-btn {
-  background-color: var(--yellow-1);
+  background-color: var(--green-2);
+  color: #1a7a6e;
 }
 
 .delete-btn {
@@ -294,34 +360,52 @@ function formatAmount(type, amount) {
   color: var(--red-1);
 }
 
-.edit-form {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
+.save-btn {
+  background-color: var(--green-2);
+  color: #1a7a6e;
 }
 
-.edit-input {
+.cancel-btn {
+  background-color: var(--black-3);
+  color: var(--black-2);
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 8px;
+  background-color: var(--black-4);
+  border-radius: 12px;
+  margin: 4px 0 12px;
+}
+
+.edit-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.edit-label {
+  font-size: 13px;
+  width: 52px;
+  flex-shrink: 0;
+}
+
+.edit-input,
+.edit-select {
+  flex: 1;
   border: 1px solid var(--black-3);
   border-radius: 8px;
-  padding: 6px 10px;
+  padding: 8px 10px;
   font-size: 13px;
   outline: none;
+  background-color: white;
 }
 
 .edit-actions {
   display: flex;
   gap: 8px;
-}
-
-.category-cell {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.category-icon {
-  width: 18px;
-  height: 18px;
+  margin-top: 4px;
 }
 </style>
