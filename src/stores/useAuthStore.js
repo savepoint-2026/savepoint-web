@@ -6,8 +6,8 @@ export const useAuthStore = defineStore('auth', {
     const userId = localStorage.getItem('userId')
 
     return {
-      isLogged: !!userId,
-      currentUserId: userId,
+      isLogged: !!userId, // 로그인 여부 표시, true가 로그인 된 상태
+      currentUserId: userId, // 현재 로그인 된 user의 id
     }
   },
 

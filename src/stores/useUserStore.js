@@ -3,9 +3,9 @@ import axios from 'axios'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
-    loading: true,
+    loading: true, // userData 사용하는 컴포넌트에 v-if="!loading"
     isModifying: false,
-    userData: {},
+    userData: {}, // 유저 정보 저장
     goalData: {},
     userModifyData: {},
     goalModifyData: {},
@@ -16,6 +16,7 @@ export const useUserStore = defineStore('user', {
       this.isModifying = bool
     },
 
+    // userData에 현재 로그인된 유저 정보 저장
     loadUserData(userId) {
       this.loading = true
       const userUrl = `/api/users/${userId}`
