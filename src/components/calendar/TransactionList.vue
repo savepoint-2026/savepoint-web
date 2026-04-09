@@ -107,10 +107,12 @@ import iconFood from "@/assets/icons/category/category-food-black.png";
 import iconTrans from "@/assets/icons/category/category-trans-black.png";
 import iconShop from "@/assets/icons/category/category-shop-black.png";
 import iconCulture from "@/assets/icons/category/category-culture-black.png";
+import iconSalary from "@/assets/icons/category/category-salary-black.png";
+import iconPocket from "@/assets/icons/category/category-pocket-black.png";
 
 const CATEGORY_MAP = {
-  c1: { name: "급여", icon: null },
-  c2: { name: "용돈", icon: null },
+  c1: { name: "급여", icon: iconSalary },
+  c2: { name: "용돈", icon: iconPocket },
   c3: { name: "식비", icon: iconFood },
   c4: { name: "교통/통신", icon: iconTrans },
   c5: { name: "쇼핑", icon: iconShop },
