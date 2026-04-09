@@ -9,6 +9,8 @@ export const useTransactionStore = defineStore('transaction', {
     transactions: [], // 전체 데이터
     selectedDate: dayjs().format('YYYY-MM-DD'), // 달력에서 클릭한 날짜 (기본값: 오늘)
     loading: false,
+    filterType: 'all',
+    filterCategory: 'all',
   }),
 
   getters: {
