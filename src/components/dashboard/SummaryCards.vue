@@ -21,7 +21,7 @@ import mainExpense from "@/assets/icons/main-page/main-expense.png";
 import mainProfit from "@/assets/icons/main-page/main-profit.png";
 
 // TODO: useUserStore 연결 후 실제 userId로 교체
-const DUMMY_USER_ID = 1;
+const DUMMY_USER_ID = "u1";
 
 const transactionStore = useTransactionStore();
 
