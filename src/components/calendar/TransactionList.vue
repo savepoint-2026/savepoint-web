@@ -31,8 +31,17 @@
         <template v-for="tx in displayedTransactions" :key="tx.id">
           <tr class="tx-row" @click="toggleSelected(tx.id)">
             <td class="fw-regular text-black-2">{{ formatDate(tx.date) }}</td>
-            <!-- TODO: categoryId → 카테고리명 변환 (카테고리 API 연동 후 교체) -->
-            <td class="fw-regular text-black-2">{{ tx.categoryId }}</td>
+            <td>
+              <div class="category-cell">
+                <img
+                  v-if="getCategoryInfo(tx.categoryId).icon"
+                  :src="getCategoryInfo(tx.categoryId).icon"
+                  class="category-icon"
+                  :alt="getCategoryInfo(tx.categoryId).name"
+                />
+                <span class="fw-regular text-black-2">{{ getCategoryInfo(tx.categoryId).name }}</span>
+              </div>
+            </td>
             <td class="fw-semibold" :class="tx.type === 'income' ? 'text-green-1' : 'text-red-1'">
               {{ formatAmount(tx.type, tx.amount) }}
             </td>
@@ -94,6 +103,23 @@ import { ref, computed, onMounted } from "vue";
 import { useTransactionStore } from "@/stores/useTransactionStore";
 import dayjs from "dayjs";
 import arrowDown from "@/assets/icons/arrow-down.png";
+import iconFood from "@/assets/icons/category/category-food-black.png";
+import iconTrans from "@/assets/icons/category/category-trans-black.png";
+import iconShop from "@/assets/icons/category/category-shop-black.png";
+import iconCulture from "@/assets/icons/category/category-culture-black.png";
+
+const CATEGORY_MAP = {
+  c1: { name: "급여", icon: null },
+  c2: { name: "용돈", icon: null },
+  c3: { name: "식비", icon: iconFood },
+  c4: { name: "교통/통신", icon: iconTrans },
+  c5: { name: "쇼핑", icon: iconShop },
+  c6: { name: "문화/여가", icon: iconCulture },
+};
+
+function getCategoryInfo(categoryId) {
+  return CATEGORY_MAP[categoryId] ?? { name: categoryId, icon: null };
+}
 
 // TODO: useUserStore 연결 후 실제 userId로 교체
 const DUMMY_USER_ID = "u1";
@@ -284,5 +310,16 @@ function formatAmount(type, amount) {
 .edit-actions {
   display: flex;
   gap: 8px;
+}
+
+.category-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.category-icon {
+  width: 18px;
+  height: 18px;
 }
 </style>
