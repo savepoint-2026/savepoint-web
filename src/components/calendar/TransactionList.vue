@@ -91,7 +91,6 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import axios from "axios";
 import { useTransactionStore } from "@/stores/useTransactionStore";
 import dayjs from "dayjs";
 import arrowDown from "@/assets/icons/arrow-down.png";
@@ -145,22 +144,16 @@ function cancelEdit() {
 }
 
 async function submitEdit(id) {
-  await axios.patch(`http://localhost:3000/transactions/${id}`, {
+  await transactionStore.updateTransaction(id, {
     memo: editForm.value.memo,
     amount: editForm.value.amount,
   });
-  const tx = transactionStore.transactions.find((t) => t.id === id);
-  if (tx) {
-    tx.memo = editForm.value.memo;
-    tx.amount = editForm.value.amount;
-  }
   editingId.value = null;
   selectedId.value = null;
 }
 
 async function deleteTransaction(id) {
-  await axios.delete(`http://localhost:3000/transactions/${id}`);
-  transactionStore.transactions = transactionStore.transactions.filter((t) => t.id !== id);
+  await transactionStore.deleteTransaction(id);
   selectedId.value = null;
 }
 
