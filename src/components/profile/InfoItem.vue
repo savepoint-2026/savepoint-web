@@ -9,7 +9,14 @@
       :data="contents[id]"
       :type="id ? 'number' : 'text'"
     />
-    <p class="text-black-1 fw-black" v-else>{{ contents[id] }} {{ id === 2 ? '&#8361' : '' }}</p>
+    <p class="text-black-1 fw-black" v-else>
+      {{
+        id === 2
+          ? userStore.userData[contents[id]].toLocaleString()
+          : userStore.userData[contents[id]]
+      }}
+      {{ id === 2 ? '&#8361' : '' }}
+    </p>
     <hr class="bg-black-3" v-if="!userStore.isModifying || id === 1" />
   </div>
 </template>
@@ -30,7 +37,7 @@ const userStore = useUserStore()
 
 const icons = [User, Mail, Limit]
 const labels = ['이름', '이메일 주소', '월간 지출 한도']
-const contents = ['김ㅇㅇ', 'email@email.com', '700,000']
+const contents = ['name', 'email', 'expenseLimit']
 </script>
 
 <style scoped>

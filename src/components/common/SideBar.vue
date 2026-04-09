@@ -1,5 +1,5 @@
 <template>
-  <nav class="sidebar">
+  <nav class="sidebar" v-if="!userStore.loading">
     <div class="profile-menu">
       <router-link to="/profile"><ProfileCard /></router-link>
       <MenuList />
@@ -16,6 +16,10 @@ import AddButton from './sidebar/AddButton.vue'
 import MenuList from './sidebar/MenuList.vue'
 import ProfileCard from './sidebar/ProfileCard.vue'
 import LogoImage from '@/assets/icons/sidebar/sidebar-logo.png'
+
+import { useUserStore } from '@/stores/useUserStore'
+
+const userStore = useUserStore()
 </script>
 
 <style scoped>

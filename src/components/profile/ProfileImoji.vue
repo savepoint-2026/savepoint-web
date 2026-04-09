@@ -1,6 +1,8 @@
 <template>
   <div class="imoji-box bg-red-3 justify-align">
-    🦊
+    {{
+      userStore.isModifying ? userStore.userModifyData.profileImg : userStore.userData.profileImg
+    }}
     <ModifyImoji v-if="userStore.isModifying" />
   </div>
 </template>

@@ -5,13 +5,19 @@
       <span class="text-black-2 fw-bold">나의 절약 목표</span>
     </div>
     <div class="goal-content bg-black-4 text-black-1 fw-black">
-      300,000 &#8361의 지갑을 나에게 선물하겠다!
+      {{
+        `${userStore.goalData.targetAmount.toLocaleString()} &#8361의 ${userStore.goalData.itemName}을(를) 나에게 선물하겠다!`
+      }}
     </div>
   </div>
 </template>
 
 <script setup>
 import Goal from '@/assets/icons/mypage/mypage-goal.png'
+
+import { useUserStore } from '@/stores/useUserStore'
+
+const userStore = useUserStore()
 </script>
 
 <style scoped>

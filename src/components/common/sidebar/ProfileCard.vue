@@ -1,14 +1,18 @@
 <template>
   <div class="profile-card bg-yellow-2 border-yellow-1 justify-align">
-    <div class="profile-image bg-red-3 justify-align">🦊</div>
-    <p class="fw-black name text-black-1">김ㅇㅇ 님,</p>
+    <div class="profile-image bg-red-3 justify-align">{{ userStore.userData.profileImg }}</div>
+    <p class="fw-black name text-black-1">{{ userStore.userData.name }} 님,</p>
     <p class="hello fw-medium text-black-2">
       오늘도 <span class="text-blue-1 fw-bold">$AVE</span> 하세요! ✨
     </p>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { useUserStore } from '@/stores/useUserStore'
+
+const userStore = useUserStore()
+</script>
 
 <style scoped>
 .profile-card {
