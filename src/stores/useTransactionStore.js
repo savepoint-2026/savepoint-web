@@ -69,6 +69,27 @@ export const useTransactionStore = defineStore('transaction', {
       }
     },
 
+    // 거래 수정
+    async updateTransaction(id, payload) {
+      try {
+        const res = await axios.patch(`${BASE_URL}/${id}`, payload)
+        const index = this.transactions.findIndex((tx) => tx.id === id)
+        if (index !== -1) this.transactions[index] = res.data
+      } catch (err) {
+        console.error('수정 실패: ', err)
+      }
+    },
+
+    // 거래 삭제
+    async deleteTransaction(id) {
+      try {
+        await axios.delete(`${BASE_URL}/${id}`)
+        this.transactions = this.transactions.filter((tx) => tx.id !== id)
+      } catch (err) {
+        console.error('삭제 실패: ', err)
+      }
+    },
+
     setSelectedDate(date) {
       this.selectedDate = date
     },
