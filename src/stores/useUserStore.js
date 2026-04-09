@@ -19,6 +19,29 @@ export const useUserStore = defineStore('user', {
     loadUserData(userId) {
       this.loading = true
       const userUrl = `/api/users/${userId}`
+
+      if (userId) {
+        axios
+          .get(userUrl, { timeout: 900 })
+          .then((response) => {
+            return response.data
+          })
+          .then((data) => {
+            this.userData = data
+            this.userModifyData = data
+            this.loading = false
+          })
+          .catch((e) => {
+            console.log(e)
+          })
+      } else {
+        this.loading = false
+      }
+    },
+
+    loadUserGoalData(userId) {
+      this.loading = true
+      const userUrl = `/api/users/${userId}`
       const goalUrl = `/api/goals?userId=${userId}`
 
       axios

@@ -46,7 +46,7 @@ const onModifyClick = () => {
           .patch(goalURI, userStore.goalModifyData)
           .then(() => {
             userStore.changeModifyMode(false)
-            userStore.loadUserData(authStore.currentUserId)
+            userStore.loadUserGoalData(authStore.currentUserId)
           })
           .catch((e) => console.error(e))
       })

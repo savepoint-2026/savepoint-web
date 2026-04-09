@@ -1,5 +1,5 @@
 <template>
-  <button class="justify-align" :class="id ? 'delete bg-red-2' : 'logout bg-black-3'">
+  <button class="justify-align" :class="id ? 'delete bg-red-2' : 'logout bg-black-3'" @click="id ? onClickDelete() : onClickLogout()">
     <img :src="id ? Delete : Logout" width="20" height="20" />
     <span class="text-black-1 fw-bold"">{{
       id ? '탈퇴' : '로그아웃'
@@ -10,10 +10,25 @@
 <script setup>
 import Logout from '@/assets/icons/group/group-mypage-out.png'
 import Delete from '@/assets/icons/mypage/mypage-delete.png'
+import { useAuthStore } from '@/stores/useAuthStore'
+import { useRouter } from 'vue-router';
 
 const { id } = defineProps({
   id: Number,
 })
+
+const router = useRouter();
+const authStore = useAuthStore();
+
+const onClickLogout = () => {
+  authStore.logout()
+  router.push('/login')
+}
+
+const onClickDelete = async () => {
+  await authStore.deleteUser(authStore.currentUserId)
+  router.push('/login')
+}
 </script>
 
 <style scoped>

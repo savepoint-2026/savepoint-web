@@ -11,5 +11,5 @@ import { useUserStore } from '@/stores/useUserStore'
 const authStore = useAuthStore()
 const userStore = useUserStore()
 
-userStore.loadUserData(authStore.currentUserId)
+userStore.loadUserGoalData(authStore.currentUserId)
 </script>

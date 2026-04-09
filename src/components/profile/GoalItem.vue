@@ -8,7 +8,7 @@
       <GoalModify v-if="userStore.isModifying" />
       <span class="text-black-1 fw-black" v-else>
         {{
-          `${userStore.goalData.targetAmount.toLocaleString()} &#8361의 ${userStore.goalData.itemName}을(를) 나에게 선물하겠다!`
+          `${Number(userStore.goalData.targetAmount).toLocaleString()} &#8361의 ${userStore.goalData.itemName}을(를) 나에게 선물하겠다!`
         }}
       </span>
     </div>

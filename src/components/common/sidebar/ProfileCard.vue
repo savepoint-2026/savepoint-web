@@ -1,16 +1,21 @@
 <template>
-  <div class="profile-card bg-yellow-2 border-yellow-1 justify-align">
+  <div class="profile-card bg-yellow-2 border-yellow-1 justify-align" v-if="authStore.isLogged">
     <div class="profile-image bg-red-3 justify-align">{{ userStore.userData.profileImg }}</div>
     <p class="fw-black name text-black-1">{{ userStore.userData.name }} 님,</p>
     <p class="hello fw-medium text-black-2">
       오늘도 <span class="text-blue-1 fw-bold">$AVE</span> 하세요! ✨
     </p>
   </div>
+  <div class="profile-card bg-yellow-2 border-yellow-1 justify-align" v-else>
+    <p class="text-black-1 fw-black">로그인 후 이용 가능합니다</p>
+  </div>
 </template>
 
 <script setup>
+import { useAuthStore } from '@/stores/useAuthStore'
 import { useUserStore } from '@/stores/useUserStore'
 
+const authStore = useAuthStore()
 const userStore = useUserStore()
 </script>
 
