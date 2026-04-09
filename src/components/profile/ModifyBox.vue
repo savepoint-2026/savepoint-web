@@ -1,11 +1,15 @@
 <template>
   <div class="button-box">
-    <ModifyButton v-for="id in [0, 1]" :id="id" />
+    <ModifyButton v-if="userStore.isModifying" :id="0" />
+    <ModifyButton :id="1" />
   </div>
 </template>
 
 <script setup>
 import ModifyButton from './ModifyButton.vue'
+import { useUserStore } from '@/stores/useUserStore'
+
+const userStore = useUserStore()
 </script>
 
 <style scoped>

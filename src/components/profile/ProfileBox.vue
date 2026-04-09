@@ -3,7 +3,7 @@
     <ProfileImoji />
     <ModifyBox />
     <InfoBox />
-    <AuthBox />
+    <AuthBox v-if="!userStore.isModifying" />
   </div>
 </template>
 
@@ -12,6 +12,10 @@ import AuthBox from './AuthBox.vue'
 import InfoBox from './InfoBox.vue'
 import ModifyBox from './ModifyBox.vue'
 import ProfileImoji from './ProfileImoji.vue'
+
+import { useUserStore } from '@/stores/useUserStore'
+
+const userStore = useUserStore()
 </script>
 
 <style scoped>

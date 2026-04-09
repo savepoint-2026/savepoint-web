@@ -1,8 +1,17 @@
 <template>
-  <div class="imoji-box bg-red-3 justify-align">🦊</div>
+  <div class="imoji-box bg-red-3 justify-align">
+    🦊
+    <ModifyImoji v-if="userStore.isModifying" />
+  </div>
 </template>
 
-<script setup></script>
+<script setup>
+import ModifyImoji from './ModifyImoji.vue'
+
+import { useUserStore } from '@/stores/useUserStore'
+
+const userStore = useUserStore()
+</script>
 
 <style scoped>
 .imoji-box {
@@ -14,5 +23,6 @@
   box-shadow: 0 2px 4px rgb(0, 0, 0, 0.05);
 
   font-size: 96px;
+  position: relative;
 }
 </style>

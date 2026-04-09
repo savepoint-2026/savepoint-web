@@ -4,8 +4,13 @@
       <img :src="icons[id]" width="18" height="18" />
       <span class="text-black-2 fw-bold">{{ labels[id] }}</span>
     </div>
-    <p class="text-black-1 fw-black">{{ contents[id] }} {{ id === 2 ? '&#8361' : '' }}</p>
-    <hr class="bg-black-3" />
+    <ProfileInput
+      v-if="userStore.isModifying && id !== 1"
+      :data="contents[id]"
+      :type="id ? 'number' : 'text'"
+    />
+    <p class="text-black-1 fw-black" v-else>{{ contents[id] }} {{ id === 2 ? '&#8361' : '' }}</p>
+    <hr class="bg-black-3" v-if="!userStore.isModifying || id === 1" />
   </div>
 </template>
 
@@ -14,9 +19,14 @@ import User from '@/assets/icons/mypage/mypage-user.png'
 import Mail from '@/assets/icons/mypage/mypage-mail.png'
 import Limit from '@/assets/icons/mypage/mypage-limit.png'
 
+import { useUserStore } from '@/stores/useUserStore'
+import ProfileInput from './ProfileInput.vue'
+
 const { id } = defineProps({
   id: Number,
 })
+
+const userStore = useUserStore()
 
 const icons = [User, Mail, Limit]
 const labels = ['이름', '이메일 주소', '월간 지출 한도']

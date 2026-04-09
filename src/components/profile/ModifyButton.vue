@@ -1,5 +1,9 @@
 <template>
-  <button class="justify-align" :class="id ? 'modify' : 'cancel'">
+  <button
+    class="justify-align"
+    :class="id ? 'modify' : 'cancel'"
+    @click="id ? onModifyClick() : onCancelClick()"
+  >
     <img :src="id ? Modify : Cancel" width="18" height="18" />
     <span class="fw-bold" :class="id ? 'text-blue-1' : 'text-black-2'">{{
       id ? '수정하기' : '취소하기'
@@ -11,11 +15,25 @@
 import Cancel from '@/assets/icons/mypage/mypage-cancel.png'
 import Modify from '@/assets/icons/mypage/mypage-modify.png'
 
+import { useUserStore } from '@/stores/useUserStore'
+
+const userStore = useUserStore()
+
 const { id } = defineProps({
   id: Number,
 })
 
-console.log(id)
+const onModifyClick = () => {
+  if (userStore.isModifying) {
+    console.log('modifying')
+  } else {
+    userStore.changeModifyMode(true)
+  }
+}
+
+const onCancelClick = () => {
+  userStore.changeModifyMode(false)
+}
 </script>
 
 <style scoped>
