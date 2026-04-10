@@ -1,5 +1,6 @@
 body {
   margin: 0;
+  -ms-overflow-style: none;
 }
 
 p {
@@ -13,6 +14,10 @@ a {
 
 input:focus {
   outline: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
 }
 
 .box-default {

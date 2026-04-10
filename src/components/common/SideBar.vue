@@ -44,6 +44,10 @@ userStore.loadUserData(authStore.currentUserId)
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+
+  position: fixed;
+  left: 0;
+  top: 0;
 }
 
 .profile-menu {

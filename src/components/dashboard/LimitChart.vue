@@ -1,102 +1,83 @@
 <template>
-  <div class="goal-chart box-default" v-if="!loading && !userStore.loading">
-    <div class="goal-box" v-if="Object.keys(goal.data).length">
+  <div class="limit-chart box-default" v-if="!userStore.loading && authStore.currentUserId">
+    <div class="limit-box" v-if="userStore.userData.expenseLimit">
       <div class="title-box">
-        <img :src="GoalIcon" width="20px" height="20px" />
-        <h2 class="section-title fw-bold text-black-1">"{{ goal.data.itemName }}" 구매까지...</h2>
+        <img :src="LimitIcon" width="20px" height="20px" />
+        <h2 class="section-title fw-bold text-black-1">한도 소진까지...</h2>
       </div>
 
       <div class="track-box">
         <div
           class="percentage bg-black-1 fw-bold justify-align"
-          :style="{ left: `calc(${goal.data.progressRate}% - 22px)` }"
+          :style="{ left: `calc(${progressRate}% - 22px)` }"
         >
-          {{ goal.data.progressRate }}%
+          {{ progressRate }}%
         </div>
-        <div class="track-icon" :style="{ left: `calc(${goal.data.progressRate}% - 14px)` }">
+        <div class="track-icon" :style="{ left: `calc(${progressRate}% - 14px)` }">
           {{ userStore.userData.profileImg }}
         </div>
         <div class="bar-track">
           <div
             class="bar-fill"
-            :class="goal.data.achieved ? 'bar-achieved' : 'bar-progress'"
-            :style="{ width: `${goal.data.progressRate}%` }"
+            :class="progressRate >= 100 ? 'bar-achieved' : 'bar-progress'"
+            :style="{ width: `${progressRate}%` }"
           />
         </div>
       </div>
-      <div class="goal-footer">
-        <div v-if="goal.data.achieved" class="celebrate">
-          <span class="fw-bold text-achieved">목표 달성!</span>
+      <div class="limit-footer">
+        <div v-if="progressRate >= 100" class="exhaust">
+          <span class="fw-bold text-exhaust">한도 소진!</span>
         </div>
-        <span class="goal-amount fw-semibold text-black-2" v-else>
-          {{ formatAmount(netProfit) }} ₩
+        <span class="limit-amount fw-semibold text-black-2" v-else>
+          {{ formatAmount(expense) }} ₩
         </span>
-        <span class="goal-amount fw-semibold text-black-1">
-          {{ formatAmount(goal.data.targetAmount) }} ₩
+        <span class="limit-amount fw-semibold text-black-1">
+          {{ formatAmount(userStore.userData.expenseLimit) }} ₩
         </span>
       </div>
     </div>
     <div v-else class="empty-state">
-      <p class="empty-msg text-black-1 fw-semibold">아직 등록된 목표가 없어요.</p>
-      <router-link to="/profile"><AddAlertButton :label="'목표'" /></router-link>
+      <p class="empty-msg text-black-1 fw-semibold">아직 등록된 한도가 없어요.</p>
+      <router-link to="/profile"><AddAlertButton :label="'한도'" /></router-link>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, reactive } from 'vue'
-import axios from 'axios'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useTransactionStore } from '@/stores/useTransactionStore'
 import { useAuthStore } from '@/stores/useAuthStore'
-import dayjs from 'dayjs'
-import GoalIcon from '@/assets/icons/main-page/main-goal-green.png'
+import LimitIcon from '@/assets/icons/main-page/main-limit-yellow.png'
 import { useUserStore } from '@/stores/useUserStore'
 import AddAlertButton from '../profile/AddAlertButton.vue'
 
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const transactionStore = useTransactionStore()
-const goal = reactive({ data: {} })
-const loading = ref(false)
+
+const progressRate = ref(0)
 
 onMounted(async () => {
-  const now = dayjs()
-  loading.value = true
   try {
-    const [goalsRes] = await Promise.all([
-      axios.get('/api/goals', {
-        params: { userId: authStore.currentUserId },
-      }),
-      transactionStore.fetchMonthlyTransactions(
-        authStore.currentUserId,
-        now.year(),
-        now.month() + 1,
-      ),
-    ])
-
-    if (goalsRes.data.length) {
-      const data = goalsRes.data[0]
-      const rate = Math.min((netProfit.value / data.targetAmount) * 100, 100)
-      goal.data = {
-        ...data,
-        progressRate: Math.max(Math.round(rate), 0),
-        achieved: netProfit.value >= data.targetAmount,
-      }
-    }
-  } finally {
     userStore.loadUserData(authStore.currentUserId)
-    loading.value = false
-  }
+  } catch {}
 })
 
-const netProfit = computed(() => {
-  const income = transactionStore.transactions
-    .filter((tx) => tx.type === 'income')
-    .reduce((sum, tx) => sum + tx.amount, 0)
-  const expense = transactionStore.transactions
+watch(
+  () => userStore.userData,
+  (newValue) => {
+    if (userStore.userData.expenseLimit) {
+      const rate = Math.min((expense.value / newValue.expenseLimit) * 100, 100)
+
+      progressRate.value = Math.max(Math.round(rate), 0)
+    }
+  },
+)
+
+const expense = computed(() => {
+  return transactionStore.transactions
     .filter((tx) => tx.type === 'expense')
     .reduce((sum, tx) => sum + tx.amount, 0)
-  return income - expense
 })
 
 function formatAmount(amount) {
@@ -105,7 +86,7 @@ function formatAmount(amount) {
 </script>
 
 <style scoped>
-.goal-chart {
+.limit-chart {
   width: 100%;
   height: 100%;
   padding: 28px 32px;
@@ -113,7 +94,7 @@ function formatAmount(amount) {
   box-sizing: border-box;
 }
 
-.goal-box {
+.limit-box {
   width: 100%;
   height: 100%;
   display: flex;
@@ -182,8 +163,7 @@ function formatAmount(amount) {
   font-size: 18px;
 }
 
-/* goal list */
-.goal-list {
+.limit-list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -192,22 +172,22 @@ function formatAmount(amount) {
   gap: 20px;
 }
 
-.goal-footer {
+.limit-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.goal-name {
+.limit-name {
   font-size: 14px;
 }
 
-.goal-amount {
+.limit-amount {
   font-size: 13px;
 }
 
-.text-achieved {
-  color: #1a7a6e;
+.text-exhaust {
+  color: var(--red-1);
 }
 
 /* progress bar */
@@ -253,29 +233,28 @@ function formatAmount(amount) {
 }
 
 .bar-progress {
-  background-color: var(--green-2);
+  background-color: var(--yellow-1);
 }
 
 .bar-achieved {
-  background-color: var(--green-1);
+  background-color: var(--red-1);
 }
 
-/* celebrate */
-.celebrate {
+.exhaust {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
-  background-color: var(--green-3);
+  background-color: var(--red-3);
   border-radius: 8px;
 }
 
-.celebrate-img {
+.exhaust-img {
   width: 18px;
   height: 18px;
 }
 
-.celebrate span {
+.exhaust span {
   font-size: 13px;
 }
 </style>

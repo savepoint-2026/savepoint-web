@@ -2,11 +2,11 @@
   <div class="recent-transactions box-default">
     <div class="header">
       <div class="header-left">
-        <img :src="iconHistory" class="header-icon" alt="최근 거래" />
-        <h2 class="section-title fw-bold text-black-1">최근 거래 내역</h2>
+        <img :src="iconHistory" class="header-icon" alt="최근 거래" width="24" height="24" />
+        <h2 class="section-title fw-black text-black-1">최근 거래 내역</h2>
       </div>
-      <router-link to="/transactions" class="more-link fw-medium text-black-2">
-        더보기 &gt;
+      <router-link to="/transactions" class="more-link fw-bold text-yellow-1">
+        전체 보기
       </router-link>
     </div>
 
@@ -33,13 +33,18 @@
             :src="getCategoryInfo(tx.categoryId).icon"
             :alt="getCategoryInfo(tx.categoryId).name"
             class="category-icon"
+            width="20"
+            height="20"
           />
         </div>
         <div class="tx-info">
-          <span class="tx-memo fw-semibold text-black-1">{{ tx.memo ?? "-" }}</span>
+          <span class="tx-memo fw-semibold text-black-1">{{ tx.memo ?? '-' }}</span>
           <span class="tx-date fw-regular text-black-2">{{ formatDate(tx.date) }}</span>
         </div>
-        <span class="tx-amount fw-bold" :class="tx.type === 'income' ? 'text-income' : 'text-expense'">
+        <span
+          class="tx-amount fw-bold"
+          :class="tx.type === 'income' ? 'text-income' : 'text-expense'"
+        >
           {{ formatAmount(tx.type, tx.amount) }}
         </span>
       </li>
@@ -48,75 +53,75 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from "vue";
-import { useTransactionStore } from "@/stores/useTransactionStore";
-import { useAuthStore } from "@/stores/useAuthStore";
-import { getCategoryInfo } from "@/constants/categories";
-import dayjs from "dayjs";
-import iconHistory from "@/assets/icons/category/category-history.png";
+import { computed, onMounted } from 'vue'
+import { useTransactionStore } from '@/stores/useTransactionStore'
+import { useAuthStore } from '@/stores/useAuthStore'
+import { getCategoryInfo } from '@/constants/categories'
+import dayjs from 'dayjs'
+import iconHistory from '@/assets/icons/main-page/main-history-purple.png'
 
-const RECENT_COUNT = 5;
+const RECENT_COUNT = 5
 
-const authStore = useAuthStore();
-const transactionStore = useTransactionStore();
+const authStore = useAuthStore()
+const transactionStore = useTransactionStore()
 
 onMounted(async () => {
-  const now = dayjs();
+  const now = dayjs()
   await transactionStore.fetchMonthlyTransactions(
     authStore.currentUserId,
     now.year(),
     now.month() + 1,
-  );
-});
+  )
+})
 
 const recentTransactions = computed(() => {
   return [...transactionStore.transactions]
     .sort((a, b) => dayjs(b.date).valueOf() - dayjs(a.date).valueOf())
-    .slice(0, RECENT_COUNT);
-});
+    .slice(0, RECENT_COUNT)
+})
 
 function formatDate(date) {
-  return dayjs(date).format("YYYY. MM. DD");
+  return dayjs(date).format('YYYY. MM. DD')
 }
 
 function formatAmount(type, amount) {
-  const sign = type === "income" ? "+" : "-";
-  return `${sign}${amount.toLocaleString("ko-KR")}`;
+  const sign = type === 'income' ? '+' : '-'
+  return `${sign}${amount.toLocaleString('ko-KR')}`
 }
 </script>
 
 <style scoped>
 .recent-transactions {
-  padding: 28px 32px;
+  grid-row: 2;
+  grid-column: 1;
+  width: 100%;
+  height: fit-content;
+  padding: 36px;
+  box-sizing: border-box;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 52px;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.header-icon {
-  width: 18px;
-  height: 18px;
-  opacity: 0.5;
+  gap: 12px;
 }
 
 .section-title {
   margin: 0;
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .more-link {
-  font-size: 13px;
+  font-size: 14px;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .more-link:hover {
@@ -145,12 +150,7 @@ function formatAmount(type, amount) {
 
 .skeleton {
   border-radius: 6px;
-  background: linear-gradient(
-    90deg,
-    var(--black-3) 25%,
-    var(--black-4) 50%,
-    var(--black-3) 75%
-  );
+  background: linear-gradient(90deg, var(--black-3) 25%, var(--black-4) 50%, var(--black-3) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -179,8 +179,12 @@ function formatAmount(type, amount) {
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* empty */
@@ -197,18 +201,13 @@ function formatAmount(type, amount) {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 40px;
 }
 
 .tx-item {
   display: flex;
   align-items: center;
-  gap: 14px;
-  cursor: pointer;
-}
-
-.tx-item:hover .tx-memo {
-  opacity: 0.7;
+  gap: 30px;
 }
 
 .tx-icon-wrap {
@@ -234,15 +233,15 @@ function formatAmount(type, amount) {
 }
 
 .tx-memo {
-  font-size: 15px;
+  font-size: 18px;
 }
 
 .tx-date {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .tx-amount {
-  font-size: 15px;
+  font-size: 20px;
   flex-shrink: 0;
 }
 
