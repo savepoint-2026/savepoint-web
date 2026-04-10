@@ -126,13 +126,10 @@ onMounted(async () => {
   );
 });
 
-const isFiltered = computed(() => !!transactionStore.selectedDate);
-
 const displayedTransactions = computed(() => {
-  const list = isFiltered.value
-    ? transactionStore.dailyTransactions
-    : transactionStore.transactions;
-  return [...list].sort((a, b) => dayjs(b.date).valueOf() - dayjs(a.date).valueOf());
+  return [...transactionStore.dailyTransactions].sort(
+    (a, b) => dayjs(b.date).valueOf() - dayjs(a.date).valueOf(),
+  );
 });
 
 const totalIncome = computed(() =>
