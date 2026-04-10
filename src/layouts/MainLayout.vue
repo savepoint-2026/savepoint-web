@@ -39,22 +39,20 @@ provide('isMobile', isMobile)
 <style scoped>
 .container {
   width: 100%;
-  height: 100dvh;
+  height: 100%;
+  min-height: 100dvh;
   background-color: #f9fafa;
   padding: 0;
-
-  display: flex;
 }
 
 .container.mobile {
-  height: 100%;
-  min-height: 100dvh;
   flex-direction: column;
 }
 
 .router-container {
   width: calc(100% - 320px);
   height: 100%;
+  margin-left: 320px;
   padding: 72px 48px;
   box-sizing: border-box;
 }
@@ -63,6 +61,7 @@ provide('isMobile', isMobile)
   width: 100%;
   flex: 1;
   overflow-y: auto;
+  margin-left: 0;
   padding: 16px;
   padding-top: 24px;
   padding-bottom: 76px;
