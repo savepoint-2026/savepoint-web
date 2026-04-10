@@ -22,8 +22,7 @@
       <tbody>
         <tr v-for="tx in recentTransactions" :key="tx.id">
           <td class="fw-regular text-black-2">{{ formatDate(tx.date) }}</td>
-          <!-- TODO: categoryId → 카테고리명 변환 (카테고리 store/API 연동 후 교체) -->
-          <td class="fw-regular text-black-2">{{ tx.categoryId }}</td>
+          <td class="fw-regular text-black-2">{{ getCategoryInfo(tx.categoryId).name }}</td>
           <td class="fw-semibold" :class="tx.type === 'income' ? 'text-green-1' : 'text-red-1'">
             {{ formatAmount(tx.type, tx.amount) }}
           </td>
@@ -37,18 +36,19 @@
 <script setup>
 import { computed, onMounted } from "vue";
 import { useTransactionStore } from "@/stores/useTransactionStore";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { getCategoryInfo } from "@/constants/categories";
 import dayjs from "dayjs";
 
-// TODO: useUserStore 연결 후 실제 userId로 교체
-const DUMMY_USER_ID = "u1";
 const RECENT_COUNT = 5;
 
+const authStore = useAuthStore();
 const transactionStore = useTransactionStore();
 
 onMounted(async () => {
   const now = dayjs();
   await transactionStore.fetchMonthlyTransactions(
-    DUMMY_USER_ID,
+    authStore.currentUserId,
     now.year(),
     now.month() + 1,
   );
