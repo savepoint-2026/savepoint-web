@@ -2,32 +2,36 @@
   <div class="goal-chart box-default">
     <h2 class="section-title fw-bold text-black-1">목표 달성</h2>
 
-    <div v-if="loading" class="empty-msg text-black-2">불러오는 중...</div>
+    <div v-if="loading" class="skeleton-wrap">
+      <div class="skeleton skeleton-title" />
+      <div class="skeleton skeleton-bar" />
+    </div>
 
-    <div v-else-if="goals.length === 0" class="empty-msg text-black-2">
-      등록된 목표가 없습니다.
+    <div v-else-if="goals.length === 0" class="empty-state">
+      <p class="empty-msg text-black-2">아직 등록된 목표가 없어요.</p>
+      <p class="empty-sub text-black-2">프로필에서 목표를 설정해보세요!</p>
     </div>
 
     <ul v-else class="goal-list">
       <li v-for="goal in goalsWithProgress" :key="goal.id" class="goal-item">
         <div class="goal-header">
           <span class="goal-name fw-medium text-black-1">{{ goal.itemName }}</span>
-          <span class="goal-status fw-semibold" :class="goal.achieved ? 'text-green-1' : 'text-black-2'">
-            {{ goal.achieved ? "달성" : `${formatAmount(netProfit)} / ${formatAmount(goal.targetAmount)}` }}
+          <span class="goal-amount fw-semibold" :class="goal.achieved ? 'text-achieved' : 'text-black-2'">
+            {{ goal.achieved ? "달성 완료!" : `${formatAmount(netProfit)} / ${formatAmount(goal.targetAmount)}` }}
           </span>
         </div>
 
         <div class="bar-track">
           <div
             class="bar-fill"
-            :class="goal.achieved ? 'bg-green-1' : 'bg-yellow-1'"
+            :class="goal.achieved ? 'bar-achieved' : 'bar-progress'"
             :style="{ width: `${goal.progressRate}%` }"
-          ></div>
+          />
         </div>
 
         <div v-if="goal.achieved" class="celebrate">
           <img :src="smileIcon" alt="달성 축하" class="celebrate-img" />
-          <span class="fw-bold text-green-1">목표 달성!</span>
+          <span class="fw-bold text-achieved">목표 달성!</span>
         </div>
       </li>
     </ul>
@@ -103,12 +107,60 @@ function formatAmount(amount) {
   font-size: 16px;
 }
 
-.empty-msg {
-  font-size: 14px;
-  text-align: center;
+/* skeleton */
+.skeleton-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeleton {
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--black-3) 25%,
+    var(--black-4) 50%,
+    var(--black-3) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-title {
+  width: 40%;
+  height: 16px;
+}
+
+.skeleton-bar {
+  width: 100%;
+  height: 12px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   padding: 24px 0;
 }
 
+.empty-msg {
+  margin: 0;
+  font-size: 14px;
+}
+
+.empty-sub {
+  margin: 0;
+  font-size: 12px;
+}
+
+/* goal list */
 .goal-list {
   list-style: none;
   padding: 0;
@@ -122,20 +174,25 @@ function formatAmount(amount) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .goal-name {
   font-size: 14px;
 }
 
-.goal-status {
+.goal-amount {
   font-size: 13px;
 }
 
+.text-achieved {
+  color: #1a7a6e;
+}
+
+/* progress bar */
 .bar-track {
   width: 100%;
-  height: 10px;
+  height: 12px;
   background-color: var(--black-3);
   border-radius: 999px;
   overflow: hidden;
@@ -147,16 +204,28 @@ function formatAmount(amount) {
   transition: width 0.4s ease;
 }
 
+.bar-progress {
+  background-color: var(--yellow-1);
+}
+
+.bar-achieved {
+  background-color: var(--green-1);
+}
+
+/* celebrate */
 .celebrate {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background-color: var(--green-3);
+  border-radius: 8px;
 }
 
 .celebrate-img {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
 .celebrate span {
