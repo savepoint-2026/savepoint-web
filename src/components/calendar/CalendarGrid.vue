@@ -17,7 +17,7 @@
         :class="[
           'day-cell',
           { 'not-current-month': !day.isCurrentMonth },
-          { 'selected-day': day.fullDate === store.selectedDate },
+          { 'selected-day': day.fullDate === store.selectedDate && !store.isMonthView },
         ]"
         @click="selectDate(day.fullDate)"
       >
@@ -88,6 +88,7 @@ const selectDate = (dateString) => {
   const newMonth = dayjs(dateString).month()
 
   store.setSelectedDate(dateString)
+  store.isMonthView = false
 
   if (oldMonth !== newMonth) {
     const year = dayjs(dateString).year()
