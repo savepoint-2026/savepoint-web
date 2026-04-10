@@ -24,11 +24,7 @@ button {
 }
 
 button:hover {
-  background-color: var(--blue-1);
-}
-
-button:hover span {
-  color: white;
+  background-color: #dde9ff;
 }
 
 span {

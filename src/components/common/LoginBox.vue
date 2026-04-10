@@ -35,10 +35,14 @@ import { ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 
+import { useAuthStore } from '@/stores/useAuthStore'
+
 const router = useRouter()
 
 const id = ref('')
 const pw = ref('')
+
+const authStore = useAuthStore()
 
 const onClickLogin = () => {
   const url = `/api/users?email=${id.value}&password=${pw.value}`
@@ -57,7 +61,7 @@ const onClickLogin = () => {
       return response.data[0]
     })
     .then((data) => {
-      window.localStorage.setItem('userId', data.id)
+      authStore.login(data.id)
       router.push('/')
     })
     .catch((e) => {
