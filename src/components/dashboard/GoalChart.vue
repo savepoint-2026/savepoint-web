@@ -38,12 +38,11 @@
 import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 import { useTransactionStore } from "@/stores/useTransactionStore";
+import { useAuthStore } from "@/stores/useAuthStore";
 import dayjs from "dayjs";
 import smileIcon from "@/assets/icons/group/group-smile.png";
 
-// TODO: useUserStore 연결 후 실제 userId로 교체
-const DUMMY_USER_ID = "u1";
-
+const authStore = useAuthStore();
 const transactionStore = useTransactionStore();
 const goals = ref([]);
 const loading = ref(false);
@@ -53,11 +52,11 @@ onMounted(async () => {
   loading.value = true;
   try {
     const [goalsRes] = await Promise.all([
-      axios.get("http://localhost:3000/goals", {
-        params: { userId: DUMMY_USER_ID },
+      axios.get("/api/goals", {
+        params: { userId: authStore.currentUserId },
       }),
       transactionStore.fetchMonthlyTransactions(
-        DUMMY_USER_ID,
+        authStore.currentUserId,
         now.year(),
         now.month() + 1,
       ),
