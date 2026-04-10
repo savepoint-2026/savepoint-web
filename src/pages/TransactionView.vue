@@ -45,4 +45,19 @@ import TransactionList from '@/components/calendar/TransactionList.vue'
   flex: 1;
   font-size: 14px;
 }
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .transaction-view {
+    flex-direction: column;
+    gap: 16px;
+    height: auto;
+  }
+
+  .left-panel,
+  .right-panel {
+    flex: none;
+    width: 100%;
+  }
+}
 </style>

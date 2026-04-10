@@ -205,4 +205,56 @@ const handleTypeChange = () => {
 .month-all-btn:hover {
   opacity: 0.8;
 }
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .filter-bar {
+    padding: 16px;
+    height: auto;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .month-nav {
+    order: 1;
+    width: 100%;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .current-month {
+    font-size: 16px;
+    width: 80px;
+  }
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .filter-group {
+    order: 2;
+    margin: 0;
+  }
+
+  .custom-select {
+    height: 36px;
+    padding: 0 24px 0 12px;
+    font-size: 12px;
+  }
+
+  .filter-icon-box {
+    width: 36px;
+    height: 36px;
+  }
+
+  .month-all-btn {
+    order: 3;
+    margin: 0;
+    height: 36px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+}
 </style>

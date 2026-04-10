@@ -134,6 +134,9 @@ const selectDate = (dateString) => {
   transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
+  transition: background-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .day-cell:nth-child(7n) {
@@ -183,5 +186,29 @@ const selectDate = (dateString) => {
 .record-expense {
   font-size: 14px;
   margin: 0;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .weekday-cell {
+    padding: 10px 0;
+    font-size: 12px;
+  }
+
+  .day-cell {
+    padding: 4px;
+    min-height: 60px;
+  }
+
+  .date-num {
+    font-size: 12px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .record-income,
+  .record-expense {
+    font-size: 10px;
+  }
 }
 </style>
