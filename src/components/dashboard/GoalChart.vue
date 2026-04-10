@@ -1,61 +1,67 @@
 <template>
-  <div class="goal-chart box-default">
-    <h2 class="section-title fw-bold text-black-1">목표 달성</h2>
+  <div class="goal-chart box-default" v-if="!loading">
+    <div class="goal-box" v-if="Object.keys(goal.data).length">
+      <div class="title-box">
+        <img :src="GoalIcon" width="20px" height="20px" />
+        <h2 class="section-title fw-bold text-black-1">"{{ goal.data.itemName }}" 구매까지...</h2>
+      </div>
 
-    <div v-if="loading" class="skeleton-wrap">
-      <div class="skeleton skeleton-title" />
-      <div class="skeleton skeleton-bar" />
-    </div>
+      <div v-if="loading" class="skeleton-wrap">
+        <div class="skeleton skeleton-title" />
+        <div class="skeleton skeleton-bar" />
+      </div>
 
-    <div v-else-if="goals.length === 0" class="empty-state">
-      <p class="empty-msg text-black-2">아직 등록된 목표가 없어요.</p>
-      <p class="empty-sub text-black-2">프로필에서 목표를 설정해보세요!</p>
-    </div>
-
-    <ul v-else class="goal-list">
-      <li v-for="goal in goalsWithProgress" :key="goal.id" class="goal-item">
-        <div class="goal-header">
-          <span class="goal-name fw-medium text-black-1">{{ goal.itemName }}</span>
-          <span
-            class="goal-amount fw-semibold"
-            :class="goal.achieved ? 'text-achieved' : 'text-black-2'"
-          >
-            {{
-              goal.achieved
-                ? '달성 완료!'
-                : `${formatAmount(netProfit)} / ${formatAmount(goal.targetAmount)}`
-            }}
-          </span>
+      <div class="track-box">
+        <div
+          class="percentage bg-black-1 fw-bold justify-align"
+          :style="{ left: `calc(${goal.data.progressRate}% - 22px)` }"
+        >
+          {{ goal.data.progressRate }}%
         </div>
-
+        <div class="track-icon" :style="{ left: `calc(${goal.data.progressRate}% - 14px)` }">
+          🦊
+        </div>
         <div class="bar-track">
           <div
             class="bar-fill"
-            :class="goal.achieved ? 'bar-achieved' : 'bar-progress'"
-            :style="{ width: `${goal.progressRate}%` }"
+            :class="goal.data.achieved ? 'bar-achieved' : 'bar-progress'"
+            :style="{ width: `${goal.data.progressRate}%` }"
           />
         </div>
-
-        <div v-if="goal.achieved" class="celebrate">
-          <img :src="smileIcon" alt="달성 축하" class="celebrate-img" />
+      </div>
+      <div class="goal-footer">
+        <div v-if="goal.data.achieved" class="celebrate">
           <span class="fw-bold text-achieved">목표 달성!</span>
         </div>
-      </li>
-    </ul>
+        <span class="goal-amount fw-semibold text-black-2" v-else>
+          {{ formatAmount(netProfit) }} ₩
+        </span>
+        <span class="goal-amount fw-semibold text-black-1">
+          {{ formatAmount(goal.data.targetAmount) }} ₩
+        </span>
+      </div>
+    </div>
+    <div v-else class="empty-state">
+      <p class="empty-msg text-black-1 fw-semibold">아직 등록된 목표가 없어요.</p>
+      <router-link to="/profile"><AddAlertButton :label="'목표'" /></router-link>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import axios from 'axios'
 import { useTransactionStore } from '@/stores/useTransactionStore'
 import { useAuthStore } from '@/stores/useAuthStore'
 import dayjs from 'dayjs'
 import smileIcon from '@/assets/icons/group/group-smile.png'
+import GoalIcon from '@/assets/icons/main-page/main-goal-green.png'
+import { useUserStore } from '@/stores/useUserStore'
+import AddAlertButton from '../profile/AddAlertButton.vue'
 
 const authStore = useAuthStore()
 const transactionStore = useTransactionStore()
-const goals = ref([])
+const goal = reactive({ data: {} })
 const loading = ref(false)
 
 onMounted(async () => {
@@ -72,7 +78,16 @@ onMounted(async () => {
         now.month() + 1,
       ),
     ])
-    goals.value = goalsRes.data
+
+    if (goalsRes.data.length) {
+      const data = goalsRes.data[0]
+      const rate = Math.min((netProfit.value / data.targetAmount) * 100, 100)
+      goal.data = {
+        ...data,
+        progressRate: Math.max(Math.round(rate), 0),
+        achieved: netProfit.value >= data.targetAmount,
+      }
+    }
   } finally {
     loading.value = false
   }
@@ -88,34 +103,40 @@ const netProfit = computed(() => {
   return income - expense
 })
 
-const goalsWithProgress = computed(() =>
-  goals.value.map((goal) => {
-    const rate = Math.min((netProfit.value / goal.targetAmount) * 100, 100)
-    return {
-      ...goal,
-      progressRate: Math.max(rate, 0),
-      achieved: netProfit.value >= goal.targetAmount,
-    }
-  }),
-)
-
 function formatAmount(amount) {
-  return `${amount.toLocaleString('ko-KR')}원`
+  return `${amount.toLocaleString('ko-KR')}`
 }
 </script>
 
 <style scoped>
 .goal-chart {
   width: 100%;
-  flex: 1;
+  height: 100%;
   padding: 28px 32px;
 
   box-sizing: border-box;
 }
 
+.goal-box {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.title-box {
+  width: fit-content;
+  height: fit-content;
+  align-items: center;
+
+  display: flex;
+  gap: 16px;
+}
+
 .section-title {
-  margin: 0 0 20px 0;
-  font-size: 16px;
+  margin: 0;
+  font-size: 18px;
 }
 
 /* skeleton */
@@ -156,18 +177,13 @@ function formatAmount(amount) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 12px;
   padding: 24px 0;
 }
 
 .empty-msg {
   margin: 0;
-  font-size: 14px;
-}
-
-.empty-sub {
-  margin: 0;
-  font-size: 12px;
+  font-size: 18px;
 }
 
 /* goal list */
@@ -180,11 +196,10 @@ function formatAmount(amount) {
   gap: 20px;
 }
 
-.goal-header {
+.goal-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
 }
 
 .goal-name {
@@ -200,9 +215,18 @@ function formatAmount(amount) {
 }
 
 /* progress bar */
+.track-box {
+  width: 100%;
+  height: fit-content;
+  padding-top: 24px;
+  box-sizing: border-box;
+
+  position: relative;
+}
+
 .bar-track {
   width: 100%;
-  height: 12px;
+  height: 16px;
   background-color: var(--black-3);
   border-radius: 999px;
   overflow: hidden;
@@ -214,8 +238,26 @@ function formatAmount(amount) {
   transition: width 0.4s ease;
 }
 
+.percentage {
+  width: 40px;
+  height: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+  color: white;
+  font-size: 10px;
+
+  position: absolute;
+  top: -8px;
+}
+
+.track-icon {
+  position: absolute;
+  top: 18px;
+  font-size: 22px;
+}
+
 .bar-progress {
-  background-color: var(--yellow-1);
+  background-color: var(--green-2);
 }
 
 .bar-achieved {
@@ -227,7 +269,6 @@ function formatAmount(amount) {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 10px;
   padding: 8px 12px;
   background-color: var(--green-3);
   border-radius: 8px;
