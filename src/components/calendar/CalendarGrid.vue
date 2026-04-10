@@ -17,7 +17,7 @@
         :class="[
           'day-cell',
           { 'not-current-month': !day.isCurrentMonth },
-          { 'selected-day': day.fullDate === store.selectedDate },
+          { 'selected-day': day.fullDate === store.selectedDate && !store.isMonthView },
         ]"
         @click="selectDate(day.fullDate)"
       >
@@ -88,6 +88,7 @@ const selectDate = (dateString) => {
   const newMonth = dayjs(dateString).month()
 
   store.setSelectedDate(dateString)
+  store.isMonthView = false
 
   if (oldMonth !== newMonth) {
     const year = dayjs(dateString).year()
@@ -131,6 +132,9 @@ const selectDate = (dateString) => {
   border-bottom: 1px solid var(--black-4);
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.2s ease;
   display: flex;
   flex-direction: column;
 }
@@ -182,5 +186,29 @@ const selectDate = (dateString) => {
 .record-expense {
   font-size: 14px;
   margin: 0;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .weekday-cell {
+    padding: 10px 0;
+    font-size: 12px;
+  }
+
+  .day-cell {
+    padding: 4px;
+    min-height: 60px;
+  }
+
+  .date-num {
+    font-size: 12px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .record-income,
+  .record-expense {
+    font-size: 10px;
+  }
 }
 </style>

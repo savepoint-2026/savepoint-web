@@ -3,8 +3,8 @@
     <li :class="currentRoute.fullPath === routeName[id] ? 'selected' : 'non-selected'">
       <img
         :src="currentRoute.fullPath === routeName[id] ? blackIcons[id] : icons[id]"
-        width="20"
-        height="20"
+        :width="isMobile ? 16 : 20"
+        :height="isMobile ? 16 : 20"
       />
       <span>{{ menuLabel[id] }}</span>
     </li>
@@ -21,6 +21,7 @@ import SummaryIcon from '@/assets/icons/sidebar/sidebar-summary.png'
 import GroupIconBlack from '@/assets/icons/sidebar/sidebar-race-black.png'
 import GroupIcon from '@/assets/icons/sidebar/sidebar-race.png'
 import { useRoute } from 'vue-router'
+import { inject } from 'vue'
 
 const menuLabel = ['메인 대시보드', '거래 내역 조회', '월별 재정 요약', '소비 레이스']
 const blackIcons = [MainIconBlack, TransIconBlack, SummaryIconBlack, GroupIconBlack]
@@ -32,6 +33,8 @@ const { id } = defineProps({
 })
 
 const currentRoute = useRoute()
+
+const isMobile = inject('isMobile')
 </script>
 
 <style scoped>
@@ -73,5 +76,21 @@ li {
 .non-selected span {
   color: var(--black-2);
   font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  li {
+    width: 100%;
+    height: 44px;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    gap: 4px;
+    justify-content: center;
+  }
+
+  span {
+    font-size: 12px;
+  }
 }
 </style>

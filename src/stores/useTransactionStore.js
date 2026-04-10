@@ -13,6 +13,7 @@ export const useTransactionStore = defineStore('transaction', {
     rangeLoading: false,
     filterType: 'all',
     filterCategory: 'all',
+    isMonthView: true,
   }),
 
   getters: {
@@ -45,8 +46,13 @@ export const useTransactionStore = defineStore('transaction', {
       }, {})
     },
 
-    // 선택된 날짜 필터링
+    // 날짜 필터링
     dailyTransactions(state) {
+      // 월 전체 조회
+      if (state.isMonthView) {
+        return this.filteredTransactions
+      }
+
       return this.filteredTransactions.filter(
         (tx) => dayjs(tx.date).format('YYYY-MM-DD') === state.selectedDate,
       )

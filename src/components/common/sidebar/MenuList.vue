@@ -16,4 +16,12 @@ ul {
   margin: 0;
   padding: 0;
 }
+
+@media (max-width: 768px) {
+  ul {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    column-gap: 8px;
+  }
+}
 </style>

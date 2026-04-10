@@ -12,6 +12,8 @@
       </button>
     </div>
 
+    <button class="month-all-btn box-shadow-sm" @click="handleMonthView">월 거래 내역 조회</button>
+
     <div class="filter-group">
       <div class="filter-icon-box bg-black-4 justify-align box-shadow-sm">
         <img src="@/assets/icons/filter.png" alt="필터" class="filter-icon" />
@@ -49,15 +51,28 @@ import dayjs from 'dayjs'
 const store = useTransactionStore()
 
 // 1. 월 이동
-const currentMonthText = computed(() => dayjs(store.selectedDate).format('YYYY / M'))
+const currentMonthText = computed(() => dayjs(store.selectedDate).format('YYYY년 M월'))
 
-const prevMonth = () => updateMonth(dayjs(store.selectedDate).subtract(1, 'month').startOf('month'))
-const nextMonth = () => updateMonth(dayjs(store.selectedDate).add(1, 'month').startOf('month'))
+const prevMonth = () =>
+  updateMonth(
+    dayjs(store.selectedDate).subtract(1, 'month').startOf('month'),
+    (store.isMonthView = true),
+  )
+
+const nextMonth = () =>
+  updateMonth(
+    dayjs(store.selectedDate).add(1, 'month').startOf('month'),
+    (store.isMonthView = true),
+  )
 
 const updateMonth = (newDateObj) => {
   const newDateStr = newDateObj.format('YYYY-MM-DD')
   store.setSelectedDate(newDateStr)
   store.fetchMonthlyTransactions('u1', newDateObj.year(), newDateObj.month() + 1)
+}
+
+const handleMonthView = () => {
+  store.isMonthView = true
 }
 
 // 필터 로직
@@ -121,14 +136,16 @@ const handleTypeChange = () => {
 }
 .current-month {
   font-size: 20px;
-  width: 90px;
+  width: 120px;
   text-align: center;
+  white-space: nowrap;
 }
 
 .filter-group {
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-left: 10px;
 }
 .filter-icon-box {
   width: 40px;
@@ -142,7 +159,7 @@ const handleTypeChange = () => {
 
 .custom-select {
   height: 40px;
-  padding: 0 32px;
+  padding: 0 40px;
   border: 1px solid var(--black-4);
   border-radius: 12px;
   appearance: none;
@@ -162,5 +179,82 @@ const handleTypeChange = () => {
 
 .box-shadow-sm {
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.month-all-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 30px;
+  margin-left: 8px;
+
+  background-color: var(--yellow-1);
+  color: var(--black-1);
+
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.month-all-btn:hover {
+  opacity: 0.8;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .filter-bar {
+    padding: 16px;
+    height: auto;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .month-nav {
+    order: 1;
+    width: 100%;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .current-month {
+    font-size: 16px;
+    width: 80px;
+  }
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .filter-group {
+    order: 2;
+    margin: 0;
+  }
+
+  .custom-select {
+    height: 36px;
+    padding: 0 24px 0 12px;
+    font-size: 12px;
+  }
+
+  .filter-icon-box {
+    width: 36px;
+    height: 36px;
+  }
+
+  .month-all-btn {
+    order: 3;
+    margin: 0;
+    height: 36px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
 }
 </style>
