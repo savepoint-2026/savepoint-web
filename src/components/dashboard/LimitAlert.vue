@@ -75,12 +75,11 @@ watch(
   height: 100%;
   min-height: 128px;
 
-  padding: 32px;
+  padding: 36px 32px;
   box-sizing: border-box;
 
   display: flex;
   gap: 16px;
-  align-items: center;
 }
 
 .icon-box {
@@ -91,6 +90,7 @@ watch(
 }
 
 .content-box {
+  height: fit-content;
   display: flex;
   flex-direction: column;
   gap: 4px;
