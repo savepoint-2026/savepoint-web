@@ -17,10 +17,10 @@ const TOOLTIP_HEIGHT = 60
 const TOOLTIP_OFFSET = 16
 
 const CATEGORY_STYLES = {
-  c3: { color: '#FBD4AC', icon: FoodIcon, iconLabel: '식비' },
-  c4: { color: '#AFC7F6', icon: TransportIcon, iconLabel: '교통' },
-  c5: { color: '#D8C0E8', icon: ShopIcon, iconLabel: '쇼핑' },
-  c6: { color: '#91DED1', icon: CultureIcon, iconLabel: '문화' },
+  c3: { color: 'var(--yellow-1)', icon: FoodIcon, iconLabel: '식비' },
+  c4: { color: 'var(--blue-1)', icon: TransportIcon, iconLabel: '교통' },
+  c5: { color: 'var(--purple-1)', icon: ShopIcon, iconLabel: '쇼핑' },
+  c6: { color: 'var(--green-1)', icon: CultureIcon, iconLabel: '문화' },
 }
 
 const metricTypes = [
@@ -193,9 +193,26 @@ const handleLeaveCategory = () => {
   tooltipCategoryId.value = null
 }
 
-const handleHighlightCategory = (categoryId) => {
+// 카테고리 hover나 click 시 툴팁 대상과 위치 함께 갱신
+const handleHighlightCategory = (categoryId, event) => {
   highlightedCategoryId.value = categoryId
   tooltipCategoryId.value = categoryId
+  if (event?.currentTarget) {
+    updateTooltipPositionFromElement(event.currentTarget)
+  } else if (event) {
+    updateTooltipPosition(event.clientX, event.clientY)
+  }
+}
+
+// 리스트 hover에서는 포인터 대신 요소를 기준으로 위치 설정
+const updateTooltipPositionFromElement = (element) => {
+  const targetRect = element?.getBoundingClientRect?.()
+  if (!targetRect) return
+
+  updateTooltipPosition(
+    targetRect.left + targetRect.width / 2,
+    targetRect.top + targetRect.height / 2,
+  )
 }
 
 const handleLeaveHighlightCategory = () => {
@@ -254,7 +271,11 @@ onMounted(() => {
 
     <div class="summary-content">
       <section class="summary-content__left">
-        <TrendBarChart :monthly-data="recentThreeMonthStats" :selected-metric="selectedMetric" />
+        <TrendBarChart
+          :key="`trend-${selectedMetric}`"
+          :monthly-data="recentThreeMonthStats"
+          :selected-metric="selectedMetric"
+        />
 
         <div class="monthly-summary-list">
           <article
@@ -266,13 +287,13 @@ onMounted(() => {
             <div class="monthly-summary-card__month">{{ item.label.replace('월', '') }}월</div>
             <p class="monthly-summary-card__title">월간 요약</p>
             <div class="monthly-summary-card__metric">
-              <span class="monthly-summary-card__label">INCOME</span>
+              <span class="monthly-summary-card__label">수입</span>
               <strong class="monthly-summary-card__income"
                 >+{{ formatCurrency(item.income) }}</strong
               >
             </div>
             <div class="monthly-summary-card__metric">
-              <span class="monthly-summary-card__label">EXPENSE</span>
+              <span class="monthly-summary-card__label">지출</span>
               <strong class="monthly-summary-card__expense"
                 >-{{ formatCurrency(item.expense) }}</strong
               >
@@ -283,6 +304,7 @@ onMounted(() => {
 
       <section class="summary-content__right">
         <CategoryDonutChart
+          :key="`donut-${selectedMetric}`"
           :items="selectedMonthExpenseCategories"
           :active-category-id="highlightedCategoryId"
           :month-label="selectedMonthKey"
@@ -296,7 +318,9 @@ onMounted(() => {
             :key="item.categoryId"
             class="category-row"
             :class="{ 'category-row--active': highlightedCategoryId === item.categoryId }"
-            @mouseenter="handleHighlightCategory(item.categoryId)"
+            @mouseenter="handleHighlightCategory(item.categoryId, $event)"
+            @mousemove="handleHighlightCategory(item.categoryId, $event)"
+            @click="handleHighlightCategory(item.categoryId, $event)"
             @mouseleave="handleLeaveHighlightCategory"
           >
             <div class="category-row__left">
@@ -328,10 +352,10 @@ onMounted(() => {
 
 .summary-view {
   position: relative;
-  height: 100%;
+  height: auto;
   overflow: visible;
   display: grid;
-  gap: 10px;
+  gap: 12px;
   padding-right: 4px;
   padding-bottom: 8px;
 }
@@ -340,31 +364,31 @@ onMounted(() => {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  min-height: 64px;
-  padding-top: 2px;
+  gap: 14px;
+  min-height: 0;
 }
 
 .summary-content {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  grid-template-columns: minmax(0, 1.28fr) minmax(372px, 0.92fr);
   gap: 18px;
+  align-items: start;
 }
 
 .summary-content__left,
 .summary-content__right {
   display: grid;
-  gap: 10px;
+  gap: 14px;
   align-content: start;
 }
 
 .metric-toggle {
   display: inline-flex;
-  gap: 4px;
+  gap: 6px;
   width: fit-content;
-  padding: 4px;
+  padding: 6px;
   background: #ffffff;
-  border-radius: 18px;
+  border-radius: 20px;
   border: 1px solid rgba(23, 25, 28, 0.08);
   box-shadow: 0 8px 18px rgba(23, 25, 28, 0.05);
 }
@@ -373,9 +397,9 @@ onMounted(() => {
   border: none;
   background: transparent;
   color: var(--black-2);
-  border-radius: 14px;
-  padding: 10px 16px;
-  font-size: 13px;
+  border-radius: 16px;
+  padding: 12px 20px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -387,7 +411,7 @@ onMounted(() => {
 
 .monthly-summary-list {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
 .monthly-summary-card,
@@ -400,10 +424,10 @@ onMounted(() => {
 
 .monthly-summary-card {
   display: grid;
-  grid-template-columns: 58px minmax(0, 1fr) 140px 140px;
+  grid-template-columns: 64px minmax(0, 1fr) 160px 160px;
   align-items: center;
-  gap: 10px;
-  padding: 12px 17px;
+  gap: 14px;
+  padding: 18px 22px;
 }
 
 .monthly-summary-card--latest {
@@ -413,21 +437,21 @@ onMounted(() => {
 }
 
 .monthly-summary-card__month {
-  width: 40px;
-  height: 40px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   background: var(--black-3);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--black-1);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
 }
 
 .monthly-summary-card__title {
   color: var(--black-1);
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 800;
 }
 
@@ -437,21 +461,20 @@ onMounted(() => {
 
 .monthly-summary-card__label {
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   color: #8e96a3;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: 0.08em;
 }
 
 .monthly-summary-card__income,
 .monthly-summary-card__expense {
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 800;
 }
 
 .monthly-summary-card__income {
-  color: var(--black-1);
+  color: var(--green-1);
 }
 
 .monthly-summary-card__expense {
@@ -459,15 +482,15 @@ onMounted(() => {
 }
 
 .category-list-card {
-  padding: 10px;
+  padding: 12px;
 }
 
 .category-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 13px 12px;
+  gap: 14px;
+  padding: 15px 14px;
   border-radius: 18px;
   background: #ffffff;
   transition:
@@ -487,13 +510,13 @@ onMounted(() => {
 .category-row__left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .category-row__icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 15px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -509,19 +532,19 @@ onMounted(() => {
 
 .category-row__icon span {
   color: #ffffff;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
 }
 
 .category-row__name {
   color: var(--black-1);
-  font-size: 14px;
-  font-weight: 800;
+  font-size: 19px;
+  font-weight: 700;
 }
 
 .category-row__amount {
   color: var(--black-1);
-  font-size: 14px;
+  font-size: 19px;
   font-weight: 800;
 }
 
@@ -544,11 +567,16 @@ onMounted(() => {
   }
 
   .summary-view {
-    gap: 16px;
+    gap: 12px;
   }
 
   .monthly-summary-card {
     grid-template-columns: 58px 1fr;
+    padding: 16px 18px;
+  }
+
+  .category-row {
+    padding: 13px 12px;
   }
 }
 </style>

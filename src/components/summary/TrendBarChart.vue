@@ -13,10 +13,10 @@ const props = defineProps({
 })
 
 const descriptionMap = {
-  all: '최근 3개월의 수입, 지출, 순이익 흐름을 한 번에 볼 수 있어요.',
-  income: '최근 3개월 수입 흐름만 집중해서 볼 수 있어요.',
-  expense: '최근 3개월 지출 흐름만 집중해서 볼 수 있어요.',
-  net: '최근 3개월 순이익 변화를 확인할 수 있어요.',
+  all: '최근 3개월의 수입, 지출, 순이익 흐름을 볼 수 있어요.',
+  income: '최근 3개월 수입 흐름을 볼 수 있어요.',
+  expense: '최근 3개월 지출 흐름을 볼 수 있어요.',
+  net: '최근 3개월 순이익 변화를 볼 수 있어요.',
 }
 
 const seriesMeta = [
@@ -123,49 +123,50 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
   background: #ffffff;
   border: 1px solid rgba(23, 25, 28, 0.05);
   border-radius: 24px;
-  padding: 18px 20px 14px;
+  min-height: 328px;
+  padding: 22px 22px 18px;
   box-shadow: 0 10px 24px rgba(23, 25, 28, 0.05);
 }
 
 .trend-card__header {
   display: flex;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 10px;
+  gap: 18px;
+  margin-bottom: 14px;
 }
 
 .trend-card__title {
   margin: 0;
   color: var(--black-1);
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 800;
 }
 
 .trend-card__description {
-  margin-top: 4px;
+  margin-top: 6px;
   color: var(--black-2);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .trend-card__legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 14px;
+  gap: 12px 16px;
   align-self: flex-start;
 }
 
 .trend-card__legend-item {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   color: var(--black-2);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
 }
 
 .trend-card__legend-dot {
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
 }
 
@@ -174,7 +175,7 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
-  min-height: 246px;
+  min-height: 254px;
 }
 
 .trend-chart__baseline {
@@ -187,7 +188,7 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
 
 .trend-chart__group {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   align-items: end;
 }
 
@@ -196,10 +197,10 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
-  gap: 6px;
+  gap: 8px;
   align-items: stretch;
-  padding: 12px 24px 0;
-  border-radius: 20px;
+  padding: 14px 20px 0;
+  border-radius: 24px;
   background:
     linear-gradient(to top, rgba(23, 25, 28, 0.04) 1px, transparent 1px) 0 100% / 100% 25%,
     #fafafb;
@@ -219,17 +220,31 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
 }
 
 .trend-chart__bar {
-  width: 22px;
+  width: 30px;
   max-width: 100%;
   border-radius: 10px 10px 4px 4px;
   min-height: 6px;
   box-shadow: 0 8px 14px rgba(23, 25, 28, 0.08);
+  animation: trend-bar-grow 0.65s ease both;
+  transform-origin: bottom;
+}
+
+.trend-chart__group:nth-child(1) .trend-chart__bar {
+  animation-delay: 0.08s;
+}
+
+.trend-chart__group:nth-child(2) .trend-chart__bar {
+  animation-delay: 0.16s;
+}
+
+.trend-chart__group:nth-child(3) .trend-chart__bar {
+  animation-delay: 0.24s;
 }
 
 .trend-chart__label {
   text-align: center;
   color: var(--black-2);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -237,14 +252,28 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 220px;
+  min-height: 240px;
   color: var(--black-2);
   font-size: 14px;
 }
 
+/* 막대 차트 애니메이션  */
+@keyframes trend-bar-grow {
+  from {
+    opacity: 0.35;
+    transform: scaleY(0.12);
+  }
+
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
 @media (max-width: 640px) {
   .trend-card {
-    padding: 14px 16px 10px;
+    min-height: auto;
+    padding: 18px 18px 14px;
   }
 
   .trend-card__header {
@@ -253,6 +282,16 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
 
   .trend-chart {
     gap: 10px;
+    min-height: 230px;
+  }
+
+  .trend-chart__bars {
+    min-height: 188px;
+    padding: 14px 16px 0;
+  }
+
+  .trend-chart__bar {
+    width: 24px;
   }
 }
 </style>
