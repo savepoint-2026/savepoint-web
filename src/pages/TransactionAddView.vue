@@ -31,10 +31,16 @@
       <div class="form-content">
         <div class="form-row">
           <span class="label fw-black text-black-1">날짜</span>
-          <div class="input-box bg-black-3">
+
+          <label class="input-box bg-black-3" style="cursor: pointer" @click="openDatePicker">
             <img src="@/assets/icons/add/add-calendar.png" alt="Calendar" class="icon" />
-            <input type="date" v-model="form.date" class="hidden-input fw-bold text-black-1" />
-          </div>
+            <input
+              type="date"
+              ref="dateInput"
+              v-model="form.date"
+              class="hidden-input fw-bold text-black-1"
+            />
+          </label>
         </div>
 
         <div class="form-row">
@@ -81,7 +87,12 @@
             >
               -
             </button>
-            <span class="headcount fw-black text-black-1">{{ form.headcount }}</span>
+            <input
+              type="number"
+              name="headcount"
+              class="hidden-input headcount fw-black text-black-1"
+              v-model="form.headcount"
+            />
             <button
               class="icon-btn bg-black-4 fw-black text-black-1 box-shadow-sm"
               @click="increaseHeadcount"
@@ -129,15 +140,7 @@ import dayjs from 'dayjs'
 const router = useRouter()
 const store = useTransactionStore()
 
-const initialState = {
-  // 초기상태
-  type: 'expense',
-  date: dayjs().format('YYYY-MM-DD'),
-  amount: null,
-  categoryId: 'c3',
-  memo: '',
-  headcount: 1,
-}
+const dateInput = ref(null)
 
 const form = reactive({
   type: 'expense',
@@ -213,6 +216,12 @@ const handleCancel = () => {
     })
 
     changeType(currentType, currentType === 'income' ? 'c1' : 'c3')
+  }
+}
+
+const openDatePicker = () => {
+  if (dateInput.value) {
+    dateInput.value.showPicker()
   }
 }
 </script>
@@ -315,8 +324,22 @@ const handleCancel = () => {
 }
 
 .hidden-input {
-  all: unset;
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
   flex: 1;
+  width: 100%;
+}
+
+.hidden-input::-webkit-outer-spin-button,
+.hidden-input::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  display: none !important;
+  margin: 0 !important;
+}
+.hidden-input[type='number'] {
+  -moz-appearance: textfield !important;
 }
 
 .icon {
@@ -341,7 +364,7 @@ const handleCancel = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 140px;
+  max-width: 160px;
   height: 56px;
   padding: 4px 6px;
 }
@@ -356,8 +379,10 @@ const handleCancel = () => {
 }
 
 .headcount {
-  font-size: 16px;
+  text-align: center !important;
+  padding: 0 !important;
 }
+
 .box-shadow-sm {
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
 }
