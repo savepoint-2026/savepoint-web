@@ -3,11 +3,11 @@
     <div class="summary-badges">
       <div class="badge badge-income">
         <span class="badge-label fw-medium">수입</span>
-        <span class="badge-amount fw-bold">+{{ totalIncome.toLocaleString("ko-KR") }}</span>
+        <span class="badge-amount fw-bold">+{{ totalIncome.toLocaleString('ko-KR') }}</span>
       </div>
       <div class="badge badge-expense">
         <span class="badge-label fw-medium">지출</span>
-        <span class="badge-amount fw-bold">-{{ totalExpense.toLocaleString("ko-KR") }}</span>
+        <span class="badge-amount fw-bold">-{{ totalExpense.toLocaleString('ko-KR') }}</span>
       </div>
     </div>
     <div class="list-header">
@@ -15,23 +15,19 @@
         <img :src="iconHistory" class="header-icon" alt="거래 상세" />
         <span class="header-title fw-medium text-black-2">거래 상세</span>
       </div>
-      <span class="header-count fw-regular text-black-2">총 {{ displayedTransactions.length }}건</span>
+      <span class="header-count fw-regular text-black-2"
+        >총 {{ displayedTransactions.length }}건</span
+      >
     </div>
 
-    <div v-if="transactionStore.loading" class="empty-msg text-black-2">
-      불러오는 중...
-    </div>
+    <div v-if="transactionStore.loading" class="empty-msg text-black-2">불러오는 중...</div>
 
     <div v-else-if="displayedTransactions.length === 0" class="empty-msg text-black-2">
       거래 내역이 없습니다.
     </div>
 
     <div v-else class="tx-list">
-      <div
-        v-for="tx in displayedTransactions"
-        :key="tx.id"
-        class="tx-item-wrapper"
-      >
+      <div v-for="tx in displayedTransactions" :key="tx.id" class="tx-item-wrapper">
         <div class="tx-item" @click="toggleSelected(tx.id)">
           <div class="tx-icon-wrap">
             <img
@@ -42,7 +38,7 @@
             />
           </div>
           <div class="tx-info">
-            <span class="tx-memo fw-semibold text-black-1">{{ tx.memo ?? "-" }}</span>
+            <span class="tx-memo fw-semibold text-black-1">{{ tx.memo ?? '-' }}</span>
             <span class="tx-date fw-regular text-black-2">{{ formatDate(tx.date) }}</span>
           </div>
           <span
@@ -55,29 +51,23 @@
 
         <div v-if="selectedId === tx.id && editingId !== tx.id" class="action-buttons">
           <button class="action-btn edit-btn fw-medium" @click.stop="startEdit(tx)">수정</button>
-          <button class="action-btn delete-btn fw-medium" @click.stop="deleteTransaction(tx.id)">삭제</button>
+          <button class="action-btn delete-btn fw-medium" @click.stop="deleteTransaction(tx.id)">
+            삭제
+          </button>
         </div>
 
         <div v-if="editingId === tx.id" class="edit-form">
           <div class="edit-row">
             <label class="edit-label fw-medium text-black-2">카테고리</label>
             <select v-model="editForm.categoryId" class="edit-select fw-regular">
-              <option
-                v-for="cat in filteredCategories(tx.type)"
-                :key="cat.id"
-                :value="cat.id"
-              >
+              <option v-for="cat in filteredCategories(tx.type)" :key="cat.id" :value="cat.id">
                 {{ cat.name }}
               </option>
             </select>
           </div>
           <div class="edit-row">
             <label class="edit-label fw-medium text-black-2">메모</label>
-            <input
-              v-model="editForm.memo"
-              class="edit-input fw-regular"
-              placeholder="메모"
-            />
+            <input v-model="editForm.memo" class="edit-input fw-regular" placeholder="메모" />
           </div>
           <div class="edit-row">
             <label class="edit-label fw-medium text-black-2">금액</label>
@@ -90,7 +80,9 @@
           </div>
           <div class="edit-actions">
             <button class="action-btn cancel-btn fw-medium" @click.stop="cancelEdit">취소</button>
-            <button class="action-btn save-btn fw-medium" @click.stop="submitEdit(tx.id)">저장</button>
+            <button class="action-btn save-btn fw-medium" @click.stop="submitEdit(tx.id)">
+              저장
+            </button>
           </div>
         </div>
       </div>
@@ -99,63 +91,59 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useTransactionStore } from "@/stores/useTransactionStore";
-import dayjs from "dayjs";
-import iconHistory from "@/assets/icons/category/category-history.png";
-import { getCategoryInfo, getCategoriesByType } from "@/constants/categories";
+import { ref, computed, onMounted } from 'vue'
+import { useTransactionStore } from '@/stores/useTransactionStore'
+import dayjs from 'dayjs'
+import iconHistory from '@/assets/icons/category/category-history.png'
+import { getCategoryInfo, getCategoriesByType } from '@/constants/categories'
 
 function filteredCategories(type) {
-  return getCategoriesByType(type);
+  return getCategoriesByType(type)
 }
 
 // TODO: useUserStore 연결 후 실제 userId로 교체
-const DUMMY_USER_ID = "u1";
+const DUMMY_USER_ID = 'u1'
 
-const transactionStore = useTransactionStore();
-const selectedId = ref(null);
-const editingId = ref(null);
-const editForm = ref({ memo: "", amount: 0, categoryId: "" });
+const transactionStore = useTransactionStore()
+const selectedId = ref(null)
+const editingId = ref(null)
+const editForm = ref({ memo: '', amount: 0, categoryId: '' })
 
 onMounted(async () => {
-  const now = dayjs();
-  await transactionStore.fetchMonthlyTransactions(
-    DUMMY_USER_ID,
-    now.year(),
-    now.month() + 1,
-  );
-});
+  const now = dayjs()
+  await transactionStore.fetchMonthlyTransactions(DUMMY_USER_ID, now.year(), now.month() + 1)
+})
 
 const displayedTransactions = computed(() => {
   return [...transactionStore.dailyTransactions].sort(
     (a, b) => dayjs(b.date).valueOf() - dayjs(a.date).valueOf(),
-  );
-});
+  )
+})
 
 const totalIncome = computed(() =>
   displayedTransactions.value
-    .filter((tx) => tx.type === "income")
+    .filter((tx) => tx.type === 'income')
     .reduce((sum, tx) => sum + tx.amount, 0),
-);
+)
 
 const totalExpense = computed(() =>
   displayedTransactions.value
-    .filter((tx) => tx.type === "expense")
+    .filter((tx) => tx.type === 'expense')
     .reduce((sum, tx) => sum + tx.amount, 0),
-);
+)
 
 function toggleSelected(id) {
-  editingId.value = null;
-  selectedId.value = selectedId.value === id ? null : id;
+  editingId.value = null
+  selectedId.value = selectedId.value === id ? null : id
 }
 
 function startEdit(tx) {
-  editingId.value = tx.id;
-  editForm.value = { memo: tx.memo ?? "", amount: tx.amount, categoryId: tx.categoryId };
+  editingId.value = tx.id
+  editForm.value = { memo: tx.memo ?? '', amount: tx.amount, categoryId: tx.categoryId }
 }
 
 function cancelEdit() {
-  editingId.value = null;
+  editingId.value = null
 }
 
 async function submitEdit(id) {
@@ -163,23 +151,23 @@ async function submitEdit(id) {
     memo: editForm.value.memo,
     amount: editForm.value.amount,
     categoryId: editForm.value.categoryId,
-  });
-  editingId.value = null;
-  selectedId.value = null;
+  })
+  editingId.value = null
+  selectedId.value = null
 }
 
 async function deleteTransaction(id) {
-  await transactionStore.deleteTransaction(id);
-  selectedId.value = null;
+  await transactionStore.deleteTransaction(id)
+  selectedId.value = null
 }
 
 function formatDate(date) {
-  return dayjs(date).format("YYYY. MM. DD");
+  return dayjs(date).format('YYYY. MM. DD')
 }
 
 function formatAmount(type, amount) {
-  const sign = type === "income" ? "+" : "-";
-  return `${sign}${amount.toLocaleString("ko-KR")}`;
+  const sign = type === 'income' ? '+' : '-'
+  return `${sign}${amount.toLocaleString('ko-KR')}`
 }
 </script>
 
@@ -384,5 +372,30 @@ function formatAmount(type, amount) {
   display: flex;
   gap: 8px;
   margin-top: 4px;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .transaction-list {
+    padding: 16px 12px;
+    height: auto;
+    overflow-y: visible;
+  }
+
+  .tx-item {
+    padding: 10px 4px;
+  }
+
+  .tx-memo {
+    font-size: 14px;
+  }
+
+  .tx-amount {
+    font-size: 14px;
+  }
+
+  .badge-amount {
+    font-size: 14px;
+  }
 }
 </style>
