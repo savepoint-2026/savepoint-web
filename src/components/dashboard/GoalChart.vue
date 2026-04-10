@@ -1,14 +1,9 @@
 <template>
-  <div class="goal-chart box-default" v-if="!loading">
+  <div class="goal-chart box-default" v-if="!loading && !userStore.loading">
     <div class="goal-box" v-if="Object.keys(goal.data).length">
       <div class="title-box">
         <img :src="GoalIcon" width="20px" height="20px" />
         <h2 class="section-title fw-bold text-black-1">"{{ goal.data.itemName }}" 구매까지...</h2>
-      </div>
-
-      <div v-if="loading" class="skeleton-wrap">
-        <div class="skeleton skeleton-title" />
-        <div class="skeleton skeleton-bar" />
       </div>
 
       <div class="track-box">
@@ -19,7 +14,7 @@
           {{ goal.data.progressRate }}%
         </div>
         <div class="track-icon" :style="{ left: `calc(${goal.data.progressRate}% - 14px)` }">
-          🦊
+          {{ userStore.userData.profileImg }}
         </div>
         <div class="bar-track">
           <div
@@ -54,12 +49,12 @@ import axios from 'axios'
 import { useTransactionStore } from '@/stores/useTransactionStore'
 import { useAuthStore } from '@/stores/useAuthStore'
 import dayjs from 'dayjs'
-import smileIcon from '@/assets/icons/group/group-smile.png'
 import GoalIcon from '@/assets/icons/main-page/main-goal-green.png'
 import { useUserStore } from '@/stores/useUserStore'
 import AddAlertButton from '../profile/AddAlertButton.vue'
 
 const authStore = useAuthStore()
+const userStore = useUserStore()
 const transactionStore = useTransactionStore()
 const goal = reactive({ data: {} })
 const loading = ref(false)
@@ -89,6 +84,7 @@ onMounted(async () => {
       }
     }
   } finally {
+    userStore.loadUserData(authStore.currentUserId)
     loading.value = false
   }
 })
