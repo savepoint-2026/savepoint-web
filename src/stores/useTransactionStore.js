@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+﻿import { defineStore } from 'pinia'
 import axios from 'axios'
 import dayjs from 'dayjs'
 
@@ -7,8 +7,10 @@ const BASE_URL = 'http://localhost:3000/transactions'
 export const useTransactionStore = defineStore('transaction', {
   state: () => ({
     transactions: [], // 전체 데이터
+    rangeTransactions: [], // 기간별 데이터
     selectedDate: dayjs().format('YYYY-MM-DD'), // 달력에서 클릭한 날짜 (기본값: 오늘)
     loading: false,
+    rangeLoading: false,
     filterType: 'all',
     filterCategory: 'all',
   }),
@@ -72,11 +74,42 @@ export const useTransactionStore = defineStore('transaction', {
       }
     },
 
+    // 기간별 조회
+    async fetchRangeTransactions(userId, startDate, endDate) {
+      this.rangeLoading = true
+
+      try {
+        const res = await axios.get(BASE_URL, {
+          params: {
+            'userId:eq': userId,
+            'date:gte': startDate,
+            'date:lte': endDate,
+          },
+        })
+        this.rangeTransactions = res.data
+      } finally {
+        this.rangeLoading = false
+      }
+    },
+
     // 거래 추가
     async addTransaction(pureRecord) {
       try {
         const res = await axios.post(BASE_URL, pureRecord)
         this.transactions.push(res.data)
+
+        // 현재 기간 조회 범위에 포함되는 거래면 rangeTransactions에도 반영
+        const summaryStart = dayjs().subtract(2, 'month').startOf('month')
+        const summaryEnd = dayjs().endOf('month')
+        const recordDate = dayjs(res.data.date)
+
+        if (
+          recordDate.isValid() &&
+          (recordDate.isAfter(summaryStart, 'day') || recordDate.isSame(summaryStart, 'day')) &&
+          (recordDate.isBefore(summaryEnd, 'day') || recordDate.isSame(summaryEnd, 'day'))
+        ) {
+          this.rangeTransactions.push(res.data)
+        }
       } catch (err) {
         console.error('등록 실패: ', err)
       }
@@ -105,6 +138,14 @@ export const useTransactionStore = defineStore('transaction', {
 
     setSelectedDate(date) {
       this.selectedDate = date
+    },
+
+    setFilterType(type) {
+      this.filterType = type
+    },
+
+    setFilterCategory(categoryId) {
+      this.filterCategory = categoryId
     },
   },
 })
