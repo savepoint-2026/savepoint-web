@@ -50,4 +50,39 @@ p {
 .hello {
   font-size: 16px;
 }
+
+@media (max-width: 768px) {
+  .profile-card {
+    width: 100%;
+    height: 108px;
+    display: grid;
+    padding: 16px;
+    box-sizing: border-box;
+
+    grid-template-columns: 80px 1fr;
+    grid-template-rows: 1fr 1fr;
+    row-gap: 8px;
+    column-gap: 12px;
+  }
+
+  .profile-image {
+    width: 76px;
+    height: 76px;
+    margin-bottom: 0;
+    font-size: 44px;
+
+    grid-row: 1 / 3;
+    grid-column: 1;
+  }
+
+  .name {
+    font-size: 18px;
+    align-self: end;
+  }
+
+  .hello {
+    font-size: 14px;
+    align-self: start;
+  }
+}
 </style>
