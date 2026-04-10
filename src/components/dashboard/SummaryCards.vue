@@ -16,74 +16,76 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from "vue";
-import { useTransactionStore } from "@/stores/useTransactionStore";
-import { useAuthStore } from "@/stores/useAuthStore";
-import dayjs from "dayjs";
-import mainIncome from "@/assets/icons/main-page/main-income.png";
-import mainExpense from "@/assets/icons/main-page/main-expense.png";
-import mainProfit from "@/assets/icons/main-page/main-profit.png";
+import { computed, onMounted } from 'vue'
+import { useTransactionStore } from '@/stores/useTransactionStore'
+import { useAuthStore } from '@/stores/useAuthStore'
+import dayjs from 'dayjs'
+import mainIncome from '@/assets/icons/main-page/main-income.png'
+import mainExpense from '@/assets/icons/main-page/main-expense.png'
+import mainProfit from '@/assets/icons/main-page/main-profit.png'
 
-const authStore = useAuthStore();
-const transactionStore = useTransactionStore();
+const authStore = useAuthStore()
+const transactionStore = useTransactionStore()
 
 onMounted(async () => {
-  const now = dayjs();
+  const now = dayjs()
   await transactionStore.fetchMonthlyTransactions(
     authStore.currentUserId,
     now.year(),
     now.month() + 1,
-  );
-});
+  )
+})
 
 const totalIncome = computed(() =>
   transactionStore.transactions
-    .filter((tx) => tx.type === "income")
+    .filter((tx) => tx.type === 'income')
     .reduce((sum, tx) => sum + tx.amount, 0),
-);
+)
 
 const totalExpense = computed(() =>
   transactionStore.transactions
-    .filter((tx) => tx.type === "expense")
+    .filter((tx) => tx.type === 'expense')
     .reduce((sum, tx) => sum + tx.amount, 0),
-);
+)
 
-const netProfit = computed(() => totalIncome.value - totalExpense.value);
+const netProfit = computed(() => totalIncome.value - totalExpense.value)
 
 const cards = computed(() => [
   {
-    label: "총 수입",
+    label: '총 수입',
     value: totalIncome.value,
-    bgClass: "bg-green-2",
+    bgClass: 'bg-green-2',
     icon: mainIncome,
-    amountClass: "text-income",
+    amountClass: 'text-income',
   },
   {
-    label: "총 지출",
+    label: '총 지출',
     value: totalExpense.value,
-    bgClass: "bg-red-2",
+    bgClass: 'bg-red-2',
     icon: mainExpense,
-    amountClass: "text-expense",
+    amountClass: 'text-expense',
   },
   {
-    label: "순수익",
+    label: '순수익',
     value: netProfit.value,
-    bgClass: "bg-blue-1",
+    bgClass: 'bg-blue-1',
     icon: mainProfit,
-    amountClass: netProfit.value >= 0 ? "text-income" : "text-expense",
+    amountClass: netProfit.value >= 0 ? 'text-income' : 'text-expense',
   },
-]);
+])
 
 function formatAmount(amount) {
-  const sign = amount < 0 ? "-" : "";
-  return `${sign}${Math.abs(amount).toLocaleString("ko-KR")}원`;
+  const sign = amount < 0 ? '-' : ''
+  return `${sign}${Math.abs(amount).toLocaleString('ko-KR')}원`
 }
 </script>
 
 <style scoped>
 .summary-cards {
+  grid-row: 1;
+  grid-column: 1 / 3;
   display: flex;
-  gap: 20px;
+  gap: 32px;
 }
 
 .card {
@@ -134,12 +136,7 @@ function formatAmount(amount) {
   width: 100px;
   height: 24px;
   border-radius: 6px;
-  background: linear-gradient(
-    90deg,
-    var(--black-3) 25%,
-    var(--black-4) 50%,
-    var(--black-3) 75%
-  );
+  background: linear-gradient(90deg, var(--black-3) 25%, var(--black-4) 50%, var(--black-3) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -150,6 +147,12 @@ function formatAmount(amount) {
   }
   100% {
     background-position: -200% 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .summary-cards {
+    overflow-x: scroll;
   }
 }
 </style>

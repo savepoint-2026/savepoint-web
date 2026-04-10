@@ -16,8 +16,15 @@
       <li v-for="goal in goalsWithProgress" :key="goal.id" class="goal-item">
         <div class="goal-header">
           <span class="goal-name fw-medium text-black-1">{{ goal.itemName }}</span>
-          <span class="goal-amount fw-semibold" :class="goal.achieved ? 'text-achieved' : 'text-black-2'">
-            {{ goal.achieved ? "달성 완료!" : `${formatAmount(netProfit)} / ${formatAmount(goal.targetAmount)}` }}
+          <span
+            class="goal-amount fw-semibold"
+            :class="goal.achieved ? 'text-achieved' : 'text-black-2'"
+          >
+            {{
+              goal.achieved
+                ? '달성 완료!'
+                : `${formatAmount(netProfit)} / ${formatAmount(goal.targetAmount)}`
+            }}
           </span>
         </div>
 
@@ -39,24 +46,24 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import axios from "axios";
-import { useTransactionStore } from "@/stores/useTransactionStore";
-import { useAuthStore } from "@/stores/useAuthStore";
-import dayjs from "dayjs";
-import smileIcon from "@/assets/icons/group/group-smile.png";
+import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
+import { useTransactionStore } from '@/stores/useTransactionStore'
+import { useAuthStore } from '@/stores/useAuthStore'
+import dayjs from 'dayjs'
+import smileIcon from '@/assets/icons/group/group-smile.png'
 
-const authStore = useAuthStore();
-const transactionStore = useTransactionStore();
-const goals = ref([]);
-const loading = ref(false);
+const authStore = useAuthStore()
+const transactionStore = useTransactionStore()
+const goals = ref([])
+const loading = ref(false)
 
 onMounted(async () => {
-  const now = dayjs();
-  loading.value = true;
+  const now = dayjs()
+  loading.value = true
   try {
     const [goalsRes] = await Promise.all([
-      axios.get("/api/goals", {
+      axios.get('/api/goals', {
         params: { userId: authStore.currentUserId },
       }),
       transactionStore.fetchMonthlyTransactions(
@@ -64,42 +71,46 @@ onMounted(async () => {
         now.year(),
         now.month() + 1,
       ),
-    ]);
-    goals.value = goalsRes.data;
+    ])
+    goals.value = goalsRes.data
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-});
+})
 
 const netProfit = computed(() => {
   const income = transactionStore.transactions
-    .filter((tx) => tx.type === "income")
-    .reduce((sum, tx) => sum + tx.amount, 0);
+    .filter((tx) => tx.type === 'income')
+    .reduce((sum, tx) => sum + tx.amount, 0)
   const expense = transactionStore.transactions
-    .filter((tx) => tx.type === "expense")
-    .reduce((sum, tx) => sum + tx.amount, 0);
-  return income - expense;
-});
+    .filter((tx) => tx.type === 'expense')
+    .reduce((sum, tx) => sum + tx.amount, 0)
+  return income - expense
+})
 
 const goalsWithProgress = computed(() =>
   goals.value.map((goal) => {
-    const rate = Math.min((netProfit.value / goal.targetAmount) * 100, 100);
+    const rate = Math.min((netProfit.value / goal.targetAmount) * 100, 100)
     return {
       ...goal,
       progressRate: Math.max(rate, 0),
       achieved: netProfit.value >= goal.targetAmount,
-    };
+    }
   }),
-);
+)
 
 function formatAmount(amount) {
-  return `${amount.toLocaleString("ko-KR")}원`;
+  return `${amount.toLocaleString('ko-KR')}원`
 }
 </script>
 
 <style scoped>
 .goal-chart {
+  width: 100%;
+  flex: 1;
   padding: 28px 32px;
+
+  box-sizing: border-box;
 }
 
 .section-title {
@@ -116,12 +127,7 @@ function formatAmount(amount) {
 
 .skeleton {
   border-radius: 6px;
-  background: linear-gradient(
-    90deg,
-    var(--black-3) 25%,
-    var(--black-4) 50%,
-    var(--black-3) 75%
-  );
+  background: linear-gradient(90deg, var(--black-3) 25%, var(--black-4) 50%, var(--black-3) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -137,8 +143,12 @@ function formatAmount(amount) {
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* empty state */
