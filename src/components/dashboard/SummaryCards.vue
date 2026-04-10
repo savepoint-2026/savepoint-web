@@ -6,7 +6,10 @@
       </div>
       <div class="card-content">
         <p class="card-label fw-medium text-black-2">{{ card.label }}</p>
-        <p class="card-amount fw-bold text-black-1">{{ formatAmount(card.value) }}</p>
+        <div v-if="transactionStore.loading" class="skeleton" />
+        <p v-else class="card-amount fw-bold" :class="card.amountClass">
+          {{ formatAmount(card.value) }}
+        </p>
       </div>
     </div>
   </div>
@@ -15,20 +18,19 @@
 <script setup>
 import { computed, onMounted } from "vue";
 import { useTransactionStore } from "@/stores/useTransactionStore";
+import { useAuthStore } from "@/stores/useAuthStore";
 import dayjs from "dayjs";
 import mainIncome from "@/assets/icons/main-page/main-income.png";
 import mainExpense from "@/assets/icons/main-page/main-expense.png";
 import mainProfit from "@/assets/icons/main-page/main-profit.png";
 
-// TODO: useUserStore 연결 후 실제 userId로 교체
-const DUMMY_USER_ID = "u1";
-
+const authStore = useAuthStore();
 const transactionStore = useTransactionStore();
 
 onMounted(async () => {
   const now = dayjs();
   await transactionStore.fetchMonthlyTransactions(
-    DUMMY_USER_ID,
+    authStore.currentUserId,
     now.year(),
     now.month() + 1,
   );
@@ -54,18 +56,21 @@ const cards = computed(() => [
     value: totalIncome.value,
     bgClass: "bg-green-2",
     icon: mainIncome,
+    amountClass: "text-income",
   },
   {
     label: "총 지출",
     value: totalExpense.value,
     bgClass: "bg-red-2",
     icon: mainExpense,
+    amountClass: "text-expense",
   },
   {
     label: "순수익",
     value: netProfit.value,
     bgClass: "bg-blue-1",
     icon: mainProfit,
+    amountClass: netProfit.value >= 0 ? "text-income" : "text-expense",
   },
 ]);
 
@@ -115,5 +120,36 @@ function formatAmount(amount) {
 .card-amount {
   margin: 0;
   font-size: 20px;
+}
+
+.text-income {
+  color: #1a7a6e;
+}
+
+.text-expense {
+  color: var(--red-1);
+}
+
+.skeleton {
+  width: 100px;
+  height: 24px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--black-3) 25%,
+    var(--black-4) 50%,
+    var(--black-3) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 </style>
