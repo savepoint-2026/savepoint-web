@@ -51,7 +51,7 @@ import dayjs from 'dayjs'
 const store = useTransactionStore()
 
 // 1. 월 이동
-const currentMonthText = computed(() => dayjs(store.selectedDate).format('YYYY / M'))
+const currentMonthText = computed(() => dayjs(store.selectedDate).format('YYYY년 M월'))
 
 const prevMonth = () =>
   updateMonth(
@@ -73,8 +73,6 @@ const updateMonth = (newDateObj) => {
 
 const handleMonthView = () => {
   store.isMonthView = true
-
-  store.selectedDate = null
 }
 
 // 필터 로직
@@ -111,7 +109,7 @@ const handleTypeChange = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 45px;
+  padding: 16px 40px;
   height: 80px;
   box-sizing: border-box;
 }
@@ -138,7 +136,7 @@ const handleTypeChange = () => {
 }
 .current-month {
   font-size: 20px;
-  width: 110px;
+  width: 120px;
   text-align: center;
   white-space: nowrap;
 }
@@ -188,7 +186,7 @@ const handleTypeChange = () => {
   align-items: center;
   justify-content: center;
   height: 40px;
-  padding: 0 35px;
+  padding: 0 30px;
   margin-left: 8px;
 
   background-color: var(--yellow-1);
