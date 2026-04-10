@@ -6,7 +6,8 @@
       </div>
       <div class="card-content">
         <p class="card-label fw-medium text-black-2">{{ card.label }}</p>
-        <p class="card-amount fw-bold text-black-1">{{ formatAmount(card.value) }}</p>
+        <p v-if="transactionStore.loading" class="card-amount fw-bold text-black-2">불러오는 중...</p>
+        <p v-else class="card-amount fw-bold text-black-1">{{ formatAmount(card.value) }}</p>
       </div>
     </div>
   </div>
@@ -15,20 +16,19 @@
 <script setup>
 import { computed, onMounted } from "vue";
 import { useTransactionStore } from "@/stores/useTransactionStore";
+import { useAuthStore } from "@/stores/useAuthStore";
 import dayjs from "dayjs";
 import mainIncome from "@/assets/icons/main-page/main-income.png";
 import mainExpense from "@/assets/icons/main-page/main-expense.png";
 import mainProfit from "@/assets/icons/main-page/main-profit.png";
 
-// TODO: useUserStore 연결 후 실제 userId로 교체
-const DUMMY_USER_ID = "u1";
-
+const authStore = useAuthStore();
 const transactionStore = useTransactionStore();
 
 onMounted(async () => {
   const now = dayjs();
   await transactionStore.fetchMonthlyTransactions(
-    DUMMY_USER_ID,
+    authStore.currentUserId,
     now.year(),
     now.month() + 1,
   );
