@@ -39,7 +39,7 @@ provide('isMobile', isMobile)
 <style scoped>
 .container {
   width: 100%;
-  min-height: 100dvh;
+  height: 100dvh;
   background-color: #f9fafa;
   padding: 0;
 
@@ -47,6 +47,8 @@ provide('isMobile', isMobile)
 }
 
 .container.mobile {
+  height: 100%;
+  min-height: 100dvh;
   flex-direction: column;
 }
 
