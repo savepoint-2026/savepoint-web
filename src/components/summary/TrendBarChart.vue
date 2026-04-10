@@ -23,51 +23,65 @@ const seriesMeta = [
   { key: 'income', label: '수입', color: 'var(--orange-1)' },
   { key: 'expense', label: '지출', color: 'var(--black-2)' },
   { key: 'net', label: '순이익', color: 'var(--green-1)' },
+  { key: 'loss', label: '적자', color: 'var(--yellow-1)' },
 ]
 
-const visibleSeries = computed(() =>
-  props.selectedMetric === 'all'
-    ? seriesMeta
-    : seriesMeta.filter((series) => series.key === props.selectedMetric),
-)
+// 순이익이 음수인 달이 있으면 전체/순이익 탭에서 적자 범주를 노출
+const visibleSeries = computed(() => {
+  const hasLoss = props.monthlyData.some((item) => (item.net ?? 0) < 0)
+  const hasPositiveNet = props.monthlyData.some((item) => (item.net ?? 0) >= 0)
+
+  if (props.selectedMetric === 'all') {
+    return seriesMeta.filter((series) => {
+      if (series.key === 'net') return hasPositiveNet
+      if (series.key === 'loss') return hasLoss
+      return ['income', 'expense'].includes(series.key)
+    })
+  }
+
+  if (props.selectedMetric === 'net') {
+    return seriesMeta.filter((series) => {
+      if (series.key === 'net') return hasPositiveNet
+      if (series.key === 'loss') return hasLoss
+      return false
+    })
+  }
+
+  return seriesMeta.filter((series) => series.key === props.selectedMetric)
+})
+
+// 적자는 음수 순이익을 절댓값으로 변환해 별도 막대로 표현
+const getSeriesValue = (item, seriesKey) => {
+  if (seriesKey === 'loss') {
+    return (item.net ?? 0) < 0 ? Math.abs(item.net ?? 0) : null
+  }
+
+  if (seriesKey === 'net') {
+    return (item.net ?? 0) >= 0 ? (item.net ?? 0) : null
+  }
+
+  return item[seriesKey] ?? 0
+}
+
+const getRenderedSeries = (item) =>
+  visibleSeries.value.filter((series) => getSeriesValue(item, series.key) !== null)
 
 const maxAbsValue = computed(() => {
   const values = props.monthlyData.flatMap((item) =>
-    visibleSeries.value.map((series) => item[series.key] ?? 0),
+    getRenderedSeries(item).map((series) => getSeriesValue(item, series.key) ?? 0),
   )
   return Math.max(...values.map((value) => Math.abs(value)), 1)
 })
 
-const baselineRatio = computed(() => {
-  const hasNegative = props.monthlyData.some((item) =>
-    visibleSeries.value.some((series) => (item[series.key] ?? 0) < 0),
-  )
-  return hasNegative ? 50 : 100
-})
-
+// 값의 크기를 최대값 대비 비율로 계산
 const getBarStyle = (value, color) => {
-  const ratio = (Math.abs(value) / maxAbsValue.value) * baselineRatio.value
+  const ratio = (Math.abs(value) / maxAbsValue.value) * 100
 
-  if (baselineRatio.value === 100) {
-    return {
-      height: `${Math.max(ratio, 6)}%`,
-      background: color,
-      alignSelf: 'end',
-    }
+  return {
+    height: `${Math.max(ratio, 6)}%`,
+    background: color,
+    alignSelf: 'end',
   }
-
-  return value >= 0
-    ? {
-        height: `${Math.max(ratio, 6)}%`,
-        background: color,
-        alignSelf: 'end',
-      }
-    : {
-        height: `${Math.max(ratio, 6)}%`,
-        background: color,
-        opacity: 0.82,
-        alignSelf: 'start',
-      }
 }
 
 const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}원`
@@ -92,20 +106,21 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
     </div>
 
     <div v-if="monthlyData.length" class="trend-chart">
-      <div v-if="baselineRatio === 50" class="trend-chart__baseline" />
-
       <div v-for="item in monthlyData" :key="item.monthKey" class="trend-chart__group">
         <div
           class="trend-chart__bars"
-          :class="{ 'trend-chart__bars--single': visibleSeries.length === 1 }"
+          :class="{ 'trend-chart__bars--single': getRenderedSeries(item).length === 1 }"
         >
           <div
-            v-for="series in visibleSeries"
+            v-for="series in getRenderedSeries(item)"
             :key="series.key"
             class="trend-chart__bar-wrap"
-            :title="`${item.label} ${series.label} ${formatCurrency(item[series.key])}`"
+            :data-tooltip="`${item.label} ${series.label} ${formatCurrency(getSeriesValue(item, series.key))}`"
           >
-            <div class="trend-chart__bar" :style="getBarStyle(item[series.key], series.color)" />
+            <div
+              class="trend-chart__bar"
+              :style="getBarStyle(getSeriesValue(item, series.key), series.color)"
+            />
           </div>
         </div>
         <div class="trend-chart__label">{{ item.label }}</div>
@@ -174,16 +189,8 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
   min-height: 254px;
-}
-
-.trend-chart__baseline {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  border-top: 1px dashed rgba(23, 25, 28, 0.12);
 }
 
 .trend-chart__group {
@@ -194,10 +201,9 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
 
 .trend-chart__bars {
   min-height: 214px;
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
-  gap: 8px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
   align-items: stretch;
   padding: 14px 20px 0;
   border-radius: 24px;
@@ -217,6 +223,7 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
   justify-content: flex-end;
   min-height: 100%;
   align-items: center;
+  position: relative;
 }
 
 .trend-chart__bar {
@@ -227,6 +234,59 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
   box-shadow: 0 8px 14px rgba(23, 25, 28, 0.08);
   animation: trend-bar-grow 0.65s ease both;
   transform-origin: bottom;
+}
+
+.trend-chart__bar-wrap::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%) translateY(3px);
+  min-width: max-content;
+  max-width: 168px;
+  padding: 7px 10px;
+  border-radius: 12px;
+  background: rgba(23, 25, 28, 0.92);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  white-space: nowrap;
+  box-shadow: 0 10px 18px rgba(23, 25, 28, 0.16);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.16s ease,
+    transform 0.16s ease;
+  z-index: 2;
+}
+
+.trend-chart__bar-wrap::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 2px);
+  width: 10px;
+  height: 10px;
+  background: rgba(23, 25, 28, 0.92);
+  transform: translateX(-50%) rotate(45deg) translateY(3px);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.16s ease,
+    transform 0.16s ease;
+  z-index: 1;
+}
+
+.trend-chart__bar-wrap:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.trend-chart__bar-wrap:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) rotate(45deg) translateY(0);
 }
 
 .trend-chart__group:nth-child(1) .trend-chart__bar {

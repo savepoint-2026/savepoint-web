@@ -1,5 +1,7 @@
 ﻿<script setup>
 import { computed } from 'vue'
+
+// 부모가 전달한 comparison 데이터와 좌표로 소비 비교 툴팁 표시
 const props = defineProps({
   comparison: {
     type: Object,

@@ -53,6 +53,8 @@ const shiftMonthKey = (monthKey, diff) => {
 const currentUserId = computed(() => window.localStorage.getItem('userId') || FALLBACK_USER_ID)
 const loading = computed(() => transactionStore.rangeLoading)
 const transactions = computed(() => transactionStore.rangeTransactions)
+
+// 조회한 기간 데이터 중 가장 최신 월을 기본 선택 월로 사용
 const latestRangeMonthKey = computed(() => {
   if (!transactions.value.length) return dayjs().format('YYYY-MM')
 
@@ -77,6 +79,7 @@ const getCategoryExpense = (monthKey, categoryId) =>
     )
     .reduce((sum, tx) => sum + Number(tx.amount || 0), 0)
 
+// 선택된 월을 기준으로 최근 3개월의 수입/지출/순이익 통계
 const recentThreeMonthStats = computed(() => {
   if (!selectedMonthKey.value) return []
 
@@ -102,6 +105,7 @@ const monthlySummaryCards = computed(() =>
   })),
 )
 
+// 현재 선택 월의 지출 카테고리별 금액과 지난달 비교값을 함께 계산
 const selectedMonthExpenseCategories = computed(() => {
   if (!selectedMonthKey.value) return []
 
@@ -220,6 +224,7 @@ const handleLeaveHighlightCategory = () => {
   tooltipCategoryId.value = null
 }
 
+// 최근 3개월 거래와 카테고리 목록을 함께 불러와 summary 화면의 기준 데이터를 준비
 const fetchSummaryData = async () => {
   const end = dayjs().endOf('month').format('YYYY-MM-DD')
   const start = dayjs(end).subtract(2, 'month').startOf('month').format('YYYY-MM-DD')
@@ -243,9 +248,6 @@ const fetchSummaryData = async () => {
 }
 
 onMounted(() => {
-  selectedMetric.value = 'all'
-  highlightedCategoryId.value = null
-  tooltipPosition.value = { x: 0, y: 0 }
   fetchSummaryData()
 })
 </script>

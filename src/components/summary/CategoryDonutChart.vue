@@ -29,6 +29,7 @@ const activeItem = computed(
     null,
 )
 
+// 현재 선택된 카테고리가 전체 지출에서 차지하는 비율
 const activeShare = computed(() => {
   if (!activeItem.value || totalAmount.value === 0) return 0
   return Math.round((activeItem.value.amount / totalAmount.value) * 100)
@@ -42,6 +43,7 @@ const polarToCartesian = (cx, cy, radius, angle) => {
   }
 }
 
+// 시작/끝 각도를 바탕으로 도넛 조각 SVG path 만들기
 const createArcPath = (startAngle, endAngle, outerRadius, innerRadius) => {
   const outerStart = polarToCartesian(120, 120, outerRadius, startAngle)
   const outerEnd = polarToCartesian(120, 120, outerRadius, endAngle)
@@ -58,6 +60,7 @@ const createArcPath = (startAngle, endAngle, outerRadius, innerRadius) => {
   ].join(' ')
 }
 
+// 카테고리 비율을 도넛 segment 데이터로 바꾸기
 const chartSegments = computed(() => {
   if (!props.items.length || totalAmount.value === 0) return []
 
