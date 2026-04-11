@@ -48,9 +48,10 @@ const userStore = useUserStore()
 
 .goal-content {
   width: 100%;
-  height: 88px;
+  height: fit-content;
+  min-height: 88px;
   border-radius: 32px;
-  padding-left: 32px;
+  padding: 20px 32px;
   box-sizing: border-box;
   display: flex;
   align-items: center;

@@ -1,7 +1,7 @@
 <template>
   <div class="box-default profile-box">
-    <ProfileImoji />
     <ModifyBox />
+    <ProfileImoji />
     <InfoBox />
     <AuthBox v-if="!userStore.isModifying" />
   </div>
@@ -29,5 +29,15 @@ const userStore = useUserStore()
   display: grid;
   grid-template-columns: 180px 1fr;
   grid-template-rows: 180px auto 98px;
+}
+
+@media (max-width: 768px) {
+  .profile-box {
+    display: flex;
+    flex-direction: column;
+
+    padding: 32px;
+    gap: 18px;
+  }
 }
 </style>

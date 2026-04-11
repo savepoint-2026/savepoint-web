@@ -22,4 +22,13 @@ div {
   top: 128px;
   left: 128px;
 }
+
+@media (max-width: 768px) {
+  div {
+    width: 32px;
+    height: 32px;
+    top: 68px;
+    left: 68px;
+  }
+}
 </style>
