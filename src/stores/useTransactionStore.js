@@ -14,6 +14,12 @@ export const useTransactionStore = defineStore('transaction', {
     filterType: 'all',
     filterCategory: 'all',
     isMonthView: true,
+    groupExpense: [
+      {
+        userid: '',
+        expense: '',
+      },
+    ],
   }),
 
   getters: {
@@ -78,6 +84,40 @@ export const useTransactionStore = defineStore('transaction', {
       } finally {
         this.loading = false
       }
+    },
+
+    // 그룹원별 비용 계산
+    async fetchGroupRunners(memberIds) {
+      try {
+        let runnersExpenses = []
+        for (const userId of memberIds) {
+          const totalAmount = await this.getCurrentMonthExpenseByUserId(userId)
+          runnersExpenses.push({
+            userId,
+            amount: totalAmount,
+          })
+        }
+        return runnersExpenses
+      } catch (err) {
+        console.error('그룹원별 비용 계산 실패: ', err)
+      }
+    },
+
+    // 현재달 비용 계산
+    async getCurrentMonthExpenseByUserId(userId) {
+      const start = dayjs().startOf('month').format('YYYY-MM-DD')
+      const end = dayjs().endOf('month').format('YYYY-MM-DD')
+
+      const res = await axios.get(BASE_URL, {
+        params: {
+          userId,
+          type: 'expense',
+          date_gte: start,
+          date_lte: end,
+        },
+      })
+
+      return res.data.reduce((sum, tx) => sum + tx.amount, 0)
     },
 
     // 기간별 조회
