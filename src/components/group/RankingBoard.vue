@@ -3,7 +3,7 @@
     <div v-for="(row, idx) in safeRows" :key="row.id" class="rank-row">
       <div class="left">
         <span class="rank fw-black text-black-2">{{ idx === 0 ? '🏆' : row.rank }}</span>
-        <div class="avatar">{{ row.avatar }}</div>
+        <div class="avatar">{{ row.profileImg }}</div>
         <div class="user">
           <p class="name fw-bold text-black-1">{{ row.name }}</p>
           <p class="desc fw-medium text-black-2">현재 지출액</p>
@@ -19,7 +19,7 @@
     <div v-for="row in dangerRows" :key="row.id" class="rank-row">
       <div class="left">
         <span class="rank fw-black text-orange-1">{{ row.rank }}</span>
-        <div class="avatar">{{ row.avatar }}</div>
+        <div class="avatar">{{ row.profileImg }}</div>
         <div class="user">
           <p class="name fw-bold text-black-2">{{ row.name }}</p>
           <p class="desc fw-medium text-black-2">현재 지출액</p>
@@ -31,20 +31,27 @@
 </template>
 
 <script setup>
+import { useGroupStore } from '@/stores/useGroupStore'
 import { computed } from 'vue'
 
-const bankruptLimit = 700000
+const groupStore = useGroupStore()
 
-const runners = [
-  { id: 1, rank: 1, name: '이유주', amount: 300000, avatar: '👩🏻' },
-  { id: 2, rank: 2, name: '하성민', amount: 400000, avatar: '🧑🏻' },
-  { id: 3, rank: 3, name: '여강휘', amount: 500000, avatar: '👩🏻' },
-  { id: 4, rank: 4, name: '김민서', amount: 720000, avatar: '🧑🏻' },
-  { id: 5, rank: 5, name: '김지연', amount: 850000, avatar: '👩🏻' },
-]
+const rankedRunners = computed(() => {
+  return [...groupStore.runners]
+    .sort((a, b) => a.amount - b.amount)
+    .map((runner, index) => ({
+      ...runner,
+      rank: index + 1,
+    }))
+})
 
-const safeRows = computed(() => runners.filter((runner) => runner.amount <= bankruptLimit))
-const dangerRows = computed(() => runners.filter((runner) => runner.amount > bankruptLimit))
+const safeRows = computed(() => {
+  return rankedRunners.value.filter((runner) => runner.danger === false)
+})
+
+const dangerRows = computed(() => {
+  return rankedRunners.value.filter((runner) => runner.danger === true)
+})
 const toWon = (value) => `${value.toLocaleString('ko-KR')} ₩`
 </script>
 
@@ -72,7 +79,7 @@ const toWon = (value) => `${value.toLocaleString('ko-KR')} ₩`
 }
 
 .rank {
-  width: 30px;
+  width: 22px;
   text-align: center;
   font-size: 22px;
   line-height: 1;
@@ -98,7 +105,7 @@ const toWon = (value) => `${value.toLocaleString('ko-KR')} ₩`
 
 .name {
   margin: 0;
-  font-size: 28px;
+  font-size: 24px;
   line-height: 1;
 }
 
@@ -110,7 +117,7 @@ const toWon = (value) => `${value.toLocaleString('ko-KR')} ₩`
 
 .amount {
   margin: 0;
-  font-size: 35px;
+  font-size: 24px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
