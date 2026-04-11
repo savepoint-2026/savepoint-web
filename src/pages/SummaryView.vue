@@ -1,11 +1,110 @@
-﻿<script setup>
+﻿<template>
+  <section ref="summaryViewRef" class="summary-view">
+    <ComparisonTooltip :comparison="hoveredComparison" :position="tooltipPosition" />
+
+    <div class="summary-toolbar">
+      <div class="metric-toggle" role="tablist" aria-label="지표 선택">
+        <button
+          v-for="type in metricTypes"
+          :key="type.value"
+          type="button"
+          class="metric-toggle__button"
+          :class="{ 'metric-toggle__button--active': selectedMetric === type.value }"
+          @click="handleMetricClick(type.value)"
+        >
+          {{ type.label }}
+        </button>
+      </div>
+    </div>
+
+    <div class="summary-content">
+      <section class="summary-content__left">
+        <TrendBarChart
+          :key="`trend-${selectedMetric}`"
+          :monthly-data="recentThreeMonthStats"
+          :selected-metric="selectedMetric"
+        />
+
+        <div class="monthly-summary-list">
+          <article
+            v-for="item in monthlySummaryCards"
+            :key="item.monthKey"
+            class="monthly-summary-card"
+            :class="{ 'monthly-summary-card--latest': item.isLatest }"
+          >
+            <div class="monthly-summary-card__month">{{ item.label.replace('월', '') }}월</div>
+            <p class="monthly-summary-card__title">월간 요약</p>
+            <div class="monthly-summary-card__metric">
+              <span class="monthly-summary-card__label">수입</span>
+              <strong class="monthly-summary-card__income"
+                >+{{ formatCurrency(item.income) }}</strong
+              >
+            </div>
+            <div class="monthly-summary-card__metric">
+              <span class="monthly-summary-card__label">지출</span>
+              <strong class="monthly-summary-card__expense"
+                >-{{ formatCurrency(item.expense) }}</strong
+              >
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="summary-content__right">
+        <CategoryDonutChart
+          :key="`donut-${selectedMetric}`"
+          :items="selectedMonthExpenseCategories"
+          :active-category-id="highlightedCategoryId"
+          :month-label="selectedMonthKey"
+          @hover-category="handleHoverCategory"
+          @leave-category="handleLeaveCategory"
+        />
+
+        <article class="category-list-card">
+          <div
+            v-for="item in selectedMonthExpenseCategories"
+            :key="item.categoryId"
+            class="category-row"
+            :class="{ 'category-row--active': highlightedCategoryId === item.categoryId }"
+            @mouseenter="handleHighlightCategory(item.categoryId, $event)"
+            @mousemove="handleHighlightCategory(item.categoryId, $event)"
+            @click="handleHighlightCategory(item.categoryId, $event)"
+            @mouseleave="handleLeaveHighlightCategory"
+          >
+            <div class="category-row__left">
+              <span class="category-row__icon" :style="{ backgroundColor: item.color }">
+                <img v-if="item.icon" :src="item.icon" :alt="item.iconLabel" />
+                <span v-else>{{ item.name.slice(0, 1) }}</span>
+              </span>
+              <span class="category-row__name">{{ item.name }}</span>
+            </div>
+            <strong class="category-row__amount">-{{ formatCurrency(item.amount) }}</strong>
+          </div>
+
+          <p
+            v-if="!selectedMonthExpenseCategories.length && !loading"
+            class="category-list-card__empty"
+          >
+            해당 월에 등록된 지출 내역이 없어요.
+          </p>
+          <p v-if="loading" class="category-list-card__empty">데이터를 불러오는 중입니다.</p>
+        </article>
+      </section>
+    </div>
+  </section>
+</template>
+
+<script setup>
 import { computed, onMounted, ref } from 'vue'
 import axios from 'axios'
 import dayjs from 'dayjs'
+
 import { useTransactionStore } from '@/stores/useTransactionStore'
+
 import TrendBarChart from '@/components/summary/TrendBarChart.vue'
 import CategoryDonutChart from '@/components/summary/CategoryDonutChart.vue'
 import ComparisonTooltip from '@/components/summary/ComparisonTooltip.vue'
+
 import FoodIcon from '@/assets/icons/category/category-food-white.png'
 import TransportIcon from '@/assets/icons/category/category-trans-white.png'
 import ShopIcon from '@/assets/icons/category/category-shop-white.png'
@@ -252,102 +351,6 @@ onMounted(() => {
 })
 </script>
 
-<template>
-  <section ref="summaryViewRef" class="summary-view">
-    <ComparisonTooltip :comparison="hoveredComparison" :position="tooltipPosition" />
-
-    <div class="summary-toolbar">
-      <div class="metric-toggle" role="tablist" aria-label="지표 선택">
-        <button
-          v-for="type in metricTypes"
-          :key="type.value"
-          type="button"
-          class="metric-toggle__button"
-          :class="{ 'metric-toggle__button--active': selectedMetric === type.value }"
-          @click="handleMetricClick(type.value)"
-        >
-          {{ type.label }}
-        </button>
-      </div>
-    </div>
-
-    <div class="summary-content">
-      <section class="summary-content__left">
-        <TrendBarChart
-          :key="`trend-${selectedMetric}`"
-          :monthly-data="recentThreeMonthStats"
-          :selected-metric="selectedMetric"
-        />
-
-        <div class="monthly-summary-list">
-          <article
-            v-for="item in monthlySummaryCards"
-            :key="item.monthKey"
-            class="monthly-summary-card"
-            :class="{ 'monthly-summary-card--latest': item.isLatest }"
-          >
-            <div class="monthly-summary-card__month">{{ item.label.replace('월', '') }}월</div>
-            <p class="monthly-summary-card__title">월간 요약</p>
-            <div class="monthly-summary-card__metric">
-              <span class="monthly-summary-card__label">수입</span>
-              <strong class="monthly-summary-card__income"
-                >+{{ formatCurrency(item.income) }}</strong
-              >
-            </div>
-            <div class="monthly-summary-card__metric">
-              <span class="monthly-summary-card__label">지출</span>
-              <strong class="monthly-summary-card__expense"
-                >-{{ formatCurrency(item.expense) }}</strong
-              >
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="summary-content__right">
-        <CategoryDonutChart
-          :key="`donut-${selectedMetric}`"
-          :items="selectedMonthExpenseCategories"
-          :active-category-id="highlightedCategoryId"
-          :month-label="selectedMonthKey"
-          @hover-category="handleHoverCategory"
-          @leave-category="handleLeaveCategory"
-        />
-
-        <article class="category-list-card">
-          <div
-            v-for="item in selectedMonthExpenseCategories"
-            :key="item.categoryId"
-            class="category-row"
-            :class="{ 'category-row--active': highlightedCategoryId === item.categoryId }"
-            @mouseenter="handleHighlightCategory(item.categoryId, $event)"
-            @mousemove="handleHighlightCategory(item.categoryId, $event)"
-            @click="handleHighlightCategory(item.categoryId, $event)"
-            @mouseleave="handleLeaveHighlightCategory"
-          >
-            <div class="category-row__left">
-              <span class="category-row__icon" :style="{ backgroundColor: item.color }">
-                <img v-if="item.icon" :src="item.icon" :alt="item.iconLabel" />
-                <span v-else>{{ item.name.slice(0, 1) }}</span>
-              </span>
-              <span class="category-row__name">{{ item.name }}</span>
-            </div>
-            <strong class="category-row__amount">-{{ formatCurrency(item.amount) }}</strong>
-          </div>
-
-          <p
-            v-if="!selectedMonthExpenseCategories.length && !loading"
-            class="category-list-card__empty"
-          >
-            해당 월에 등록된 지출 내역이 없어요.
-          </p>
-          <p v-if="loading" class="category-list-card__empty">데이터를 불러오는 중입니다.</p>
-        </article>
-      </section>
-    </div>
-  </section>
-</template>
-
 <style scoped>
 @import '@/assets/color.css';
 @import '@/assets/font.css';
@@ -464,7 +467,7 @@ onMounted(() => {
 .monthly-summary-card__label {
   display: block;
   margin-bottom: 6px;
-  color: #8e96a3;
+  color: var(--black-2);
   font-size: 12px;
   font-weight: 800;
 }
@@ -505,7 +508,7 @@ onMounted(() => {
 }
 
 .category-row--active {
-  background: #fff7f0;
+  background: var(--yellow-2);
   transform: translateY(-1px);
 }
 
