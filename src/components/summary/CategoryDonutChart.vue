@@ -152,7 +152,6 @@ const emitHoverCategory = (categoryId, event) => {
     categoryId,
     clientX: event.clientX ?? targetRect?.left + targetRect?.width / 2 ?? 0,
     clientY: event.clientY ?? targetRect?.top + targetRect?.height / 2 ?? 0,
-    source: 'chart',
   })
 }
 </script>

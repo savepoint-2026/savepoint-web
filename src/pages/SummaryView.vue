@@ -20,7 +20,6 @@
     <div class="summary-content">
       <section class="summary-content__left">
         <TrendBarChart
-          :key="`trend-${selectedMetric}`"
           :monthly-data="recentThreeMonthStats"
           :selected-metric="selectedMetric"
         />
@@ -52,7 +51,6 @@
 
       <section class="summary-content__right">
         <CategoryDonutChart
-          :key="`donut-${selectedMetric}`"
           :items="selectedMonthExpenseCategories"
           :active-category-id="highlightedCategoryId"
           :month-label="selectedMonthKey"
@@ -163,20 +161,39 @@ const latestRangeMonthKey = computed(() => {
   }, parseMonthKey(transactions.value[0].date))
 })
 
-const getMonthlyAmountByType = (monthKey, type) =>
-  transactions.value
-    .filter((tx) => parseMonthKey(tx.date) === monthKey && tx.type === type)
-    .reduce((sum, tx) => sum + Number(tx.amount || 0), 0)
+const monthlyAggregation = computed(() => {
+  const byMonth = new Map()
 
-const getCategoryExpense = (monthKey, categoryId) =>
-  transactions.value
-    .filter(
-      (tx) =>
-        parseMonthKey(tx.date) === monthKey &&
-        tx.type === 'expense' &&
-        tx.categoryId === categoryId,
-    )
-    .reduce((sum, tx) => sum + Number(tx.amount || 0), 0)
+  transactions.value.forEach((tx) => {
+    const monthKey = parseMonthKey(tx.date)
+    const amount = Number(tx.amount || 0)
+
+    if (!byMonth.has(monthKey)) {
+      byMonth.set(monthKey, {
+        income: 0,
+        expense: 0,
+        expenseByCategory: new Map(),
+      })
+    }
+
+    const monthData = byMonth.get(monthKey)
+    if (tx.type === 'income') {
+      monthData.income += amount
+      return
+    }
+
+    if (tx.type === 'expense') {
+      monthData.expense += amount
+
+      if (tx.categoryId) {
+        const prevAmount = monthData.expenseByCategory.get(tx.categoryId) ?? 0
+        monthData.expenseByCategory.set(tx.categoryId, prevAmount + amount)
+      }
+    }
+  })
+
+  return byMonth
+})
 
 // 선택된 월을 기준으로 최근 3개월의 수입/지출/순이익 통계
 const recentThreeMonthStats = computed(() => {
@@ -184,8 +201,9 @@ const recentThreeMonthStats = computed(() => {
 
   return [2, 1, 0].map((diff) => {
     const monthKey = shiftMonthKey(selectedMonthKey.value, -diff)
-    const income = getMonthlyAmountByType(monthKey, 'income')
-    const expense = getMonthlyAmountByType(monthKey, 'expense')
+    const monthData = monthlyAggregation.value.get(monthKey)
+    const income = monthData?.income ?? 0
+    const expense = monthData?.expense ?? 0
 
     return {
       monthKey,
@@ -210,11 +228,13 @@ const selectedMonthExpenseCategories = computed(() => {
 
   const prevMonthKey = shiftMonthKey(selectedMonthKey.value, -1)
   const expenseCategories = categories.value.filter((category) => category.type === 'expense')
+  const currentMonthData = monthlyAggregation.value.get(selectedMonthKey.value)
+  const previousMonthData = monthlyAggregation.value.get(prevMonthKey)
 
   return expenseCategories
     .map((category) => {
-      const amount = getCategoryExpense(selectedMonthKey.value, category.id)
-      const previousAmount = getCategoryExpense(prevMonthKey, category.id)
+      const amount = currentMonthData?.expenseByCategory.get(category.id) ?? 0
+      const previousAmount = previousMonthData?.expenseByCategory.get(category.id) ?? 0
       const style = CATEGORY_STYLES[category.id] ?? {
         color: '#D9DDE3',
         icon: null,
@@ -291,9 +311,13 @@ const handleHoverCategory = (payload) => {
   updateTooltipPosition(payload.clientX, payload.clientY)
 }
 
-const handleLeaveCategory = () => {
+const resetCategoryHoverState = () => {
   highlightedCategoryId.value = null
   tooltipCategoryId.value = null
+}
+
+const handleLeaveCategory = () => {
+  resetCategoryHoverState()
 }
 
 // 카테고리 hover나 click 시 툴팁 대상과 위치 함께 갱신
@@ -319,8 +343,7 @@ const updateTooltipPositionFromElement = (element) => {
 }
 
 const handleLeaveHighlightCategory = () => {
-  highlightedCategoryId.value = null
-  tooltipCategoryId.value = null
+  resetCategoryHoverState()
 }
 
 // 최근 3개월 거래와 카테고리 목록을 함께 불러와 summary 화면의 기준 데이터를 준비
