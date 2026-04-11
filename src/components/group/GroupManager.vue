@@ -24,7 +24,7 @@
                 <p class="card-subtitle fw-medium text-black-2">
                   {{
                     activePanel === 'join'
-                      ? '초대코드 6자리를 입력해 주세요.'
+                      ? '초대코드를 입력해 주세요.'
                       : '그룹 이름과 그룹 한도를 설정해 주세요'
                   }}
                 </p>
@@ -61,10 +61,10 @@
               <div class="labeled-row">
                 <span class="fw-black text-black-1 label">한도</span>
                 <input
-                  v-model.number="groupLimit"
+                  v-model.number="targetAmount"
                   class="bg-black-3 text-black-1 fw-medium input-field"
                   type="number"
-                  min="0"
+                  min="10000"
                 />
               </div>
 
@@ -81,16 +81,27 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useGroupStore } from '@/stores/useGroupStore'
+import { onMounted, ref } from 'vue'
 import CheckIcon from '@/assets/icons/check.png'
 import CloseIcon from '@/assets/icons/x-black.png'
+import { useUserStore } from '@/stores/useUserStore'
+import { useGroupStore } from '@/stores/useGroupStore'
+import { useAuthStore } from '@/stores/useAuthStore'
 
 const groupStore = useGroupStore()
+const userStore = useUserStore()
+const AuthStore = useAuthStore()
 
 const activePanel = ref('')
 const joinCode = ref('')
 const groupName = ref('')
+const targetAmount = ref('')
+
+onMounted(async () => {
+  userStore.loadUserData(userStore.currentUserId)
+})
+
+const userId = AuthStore.currentUserId
 
 const openPanel = (panelType) => {
   activePanel.value = panelType
@@ -102,13 +113,18 @@ const closePanel = () => {
 
 const onClickJoin = async () => {
   if (!joinCode.value || typeof groupStore.joinGroup !== 'function') return
-  await groupStore.joinGroup({ inviteCode: joinCode.value })
+  await groupStore.joinGroup(userId, joinCode.value)
+  const groupId = groupStore.currentGroup.id
+  await userStore.updateGroupId(userId, groupId)
+
   closePanel()
 }
 
 const onClickCreate = async () => {
   if (!groupName.value || typeof groupStore.addGroup !== 'function') return
-  await groupStore.addGroup({})
+  await groupStore.addGroup(userId, groupName.value, targetAmount.value)
+  const groupId = groupStore.currentGroup.id
+  await userStore.updateGroupId(userId, groupId)
   closePanel()
 }
 </script>
