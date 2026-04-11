@@ -97,6 +97,7 @@ import { computed, onMounted, ref } from 'vue'
 import axios from 'axios'
 import dayjs from 'dayjs'
 
+import { useAuthStore } from '@/stores/useAuthStore'
 import { useTransactionStore } from '@/stores/useTransactionStore'
 
 import TrendBarChart from '@/components/summary/TrendBarChart.vue'
@@ -108,7 +109,6 @@ import TransportIcon from '@/assets/icons/category/category-trans-white.png'
 import ShopIcon from '@/assets/icons/category/category-shop-white.png'
 import CultureIcon from '@/assets/icons/category/category-culture-white.png'
 
-const FALLBACK_USER_ID = 'u1'
 const TOOLTIP_WIDTH = 212
 const TOOLTIP_HEIGHT = 60
 const TOOLTIP_OFFSET = 16
@@ -129,6 +129,7 @@ const metricTypes = [
 
 const categoryStoreUrl = 'http://localhost:3000/categories'
 
+const authStore = useAuthStore()
 const transactionStore = useTransactionStore()
 const categories = ref([])
 const tooltipCategoryId = ref(null)
@@ -147,7 +148,7 @@ const shiftMonthKey = (monthKey, diff) => {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
 }
 
-const currentUserId = computed(() => window.localStorage.getItem('userId') || FALLBACK_USER_ID)
+const currentUserId = computed(() => authStore.currentUserId)
 const loading = computed(() => transactionStore.rangeLoading)
 const transactions = computed(() => transactionStore.rangeTransactions)
 
