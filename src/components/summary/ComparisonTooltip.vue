@@ -1,5 +1,7 @@
 ﻿<script setup>
 import { computed } from 'vue'
+
+// 부모가 전달한 comparison 데이터와 좌표로 소비 비교 툴팁 표시
 const props = defineProps({
   comparison: {
     type: Object,
@@ -41,15 +43,15 @@ const summary = computed(() => {
 .comparison-tooltip {
   position: absolute;
   z-index: 20;
-  width: 212px;
+  width: 236px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 8px 10px;
+  gap: 10px;
+  min-height: 52px;
+  padding: 10px 12px;
   background: linear-gradient(135deg, #ffffff 0%, #f7f7fa 100%);
   border: 1px solid rgba(23, 25, 28, 0.06);
-  border-radius: 18px;
+  border-radius: 20px;
   box-shadow: 0 10px 18px rgba(23, 25, 28, 0.05);
   opacity: 0;
   visibility: hidden;
@@ -68,16 +70,16 @@ const summary = computed(() => {
 }
 
 .comparison-tooltip__icon {
-  width: 24px;
-  height: 24px;
-  border-radius: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 12px;
   background: #fffdf4;
   border: 1px solid rgba(23, 25, 28, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #f4b52d;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   flex-shrink: 0;
 }
@@ -98,7 +100,7 @@ const summary = computed(() => {
 .comparison-tooltip__title {
   -webkit-line-clamp: 1;
   color: var(--black-1);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
 }
 
@@ -106,7 +108,7 @@ const summary = computed(() => {
   -webkit-line-clamp: 2;
   margin-top: 4px;
   color: var(--black-2);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
 }
 </style>
