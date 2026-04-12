@@ -1,4 +1,19 @@
-﻿<script setup>
+﻿<template>
+  <div
+    class="comparison-tooltip"
+    :class="{ 'comparison-tooltip--active': props.comparison }"
+    :style="{ left: `${props.position.x}px`, top: `${props.position.y}px` }"
+  >
+    <div class="comparison-tooltip__icon">!</div>
+
+    <div class="comparison-tooltip__content">
+      <p class="comparison-tooltip__title">{{ title }}</p>
+      <p class="comparison-tooltip__summary">{{ summary }}</p>
+    </div>
+  </div>
+</template>
+
+<script setup>
 import { computed } from 'vue'
 
 // 부모가 전달한 comparison 데이터와 좌표로 소비 비교 툴팁 표시
@@ -21,21 +36,6 @@ const summary = computed(() => {
   return `${props.comparison.detail} 현재 ${formatAmount(props.comparison.currentAmount)}`
 })
 </script>
-
-<template>
-  <div
-    class="comparison-tooltip"
-    :class="{ 'comparison-tooltip--active': props.comparison }"
-    :style="{ left: `${props.position.x}px`, top: `${props.position.y}px` }"
-  >
-    <div class="comparison-tooltip__icon">!</div>
-
-    <div class="comparison-tooltip__content">
-      <p class="comparison-tooltip__title">{{ title }}</p>
-      <p class="comparison-tooltip__summary">{{ summary }}</p>
-    </div>
-  </div>
-</template>
 
 <style scoped>
 @import '@/assets/color.css';
@@ -65,7 +65,7 @@ const summary = computed(() => {
 .comparison-tooltip--active {
   opacity: 1;
   visibility: visible;
-  background: linear-gradient(135deg, #fff8f1 0%, #ffffff 100%);
+  background: linear-gradient(135deg, var(--yellow-2) 0%, #ffffff 100%);
   transform: translate3d(0, 0, 0);
 }
 

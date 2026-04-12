@@ -1,4 +1,59 @@
-﻿<script setup>
+﻿<template>
+  <article class="donut-card" @mouseleave="emit('leave-category')">
+    <div class="donut-card__header">
+      <div>
+        <h2 class="donut-card__title">어디에 많이 썼을까?</h2>
+        <p class="donut-card__description">각 항목에 마우스를 올려보세요!</p>
+      </div>
+    </div>
+
+    <div v-if="items.length" class="donut-card__body">
+      <div class="category-donut-chart">
+        <svg
+          viewBox="0 0 240 240"
+          class="category-donut-chart__svg"
+          aria-label="지출 카테고리 분포"
+          @mouseleave="emit('leave-category')"
+        >
+          <path
+            v-for="segment in chartSegments"
+            :key="segment.categoryId"
+            :d="segment.path"
+            :fill="segment.color"
+            class="category-donut-chart__segment"
+            :class="{ 'category-donut-chart__segment--active': segment.active }"
+            @mouseenter="emitHoverCategory(segment.categoryId, $event)"
+            @mousemove="emitHoverCategory(segment.categoryId, $event)"
+            @click="emitHoverCategory(segment.categoryId, $event)"
+          />
+        </svg>
+
+        <div class="category-donut-chart__center">
+          <p class="category-donut-chart__month">{{ formatMonthLabel }}</p>
+          <strong class="category-donut-chart__share">{{ activeShare }}%</strong>
+        </div>
+      </div>
+
+      <ul class="donut-card__legend">
+        <li
+          v-for="item in items"
+          :key="item.categoryId"
+          class="donut-card__legend-item"
+          :class="{ 'donut-card__legend-item--active': item.categoryId === props.activeCategoryId }"
+        >
+          <span class="donut-card__swatch" :style="{ backgroundColor: item.color }" />
+          <span class="donut-card__legend-label">{{ item.name }}</span>
+        </li>
+      </ul>
+    </div>
+
+    <div v-else class="category-donut-chart category-donut-chart--empty">
+      <p>해당 월의 지출 데이터가 없어요.</p>
+    </div>
+  </article>
+</template>
+
+<script setup>
 import { computed } from 'vue'
 
 const emit = defineEmits(['hover-category', 'leave-category'])
@@ -97,65 +152,9 @@ const emitHoverCategory = (categoryId, event) => {
     categoryId,
     clientX: event.clientX ?? targetRect?.left + targetRect?.width / 2 ?? 0,
     clientY: event.clientY ?? targetRect?.top + targetRect?.height / 2 ?? 0,
-    source: 'chart',
   })
 }
 </script>
-
-<template>
-  <article class="donut-card" @mouseleave="emit('leave-category')">
-    <div class="donut-card__header">
-      <div>
-        <h2 class="donut-card__title">어디에 많이 썼을까?</h2>
-        <p class="donut-card__description">각 항목에 마우스를 올려보세요!</p>
-      </div>
-    </div>
-
-    <div v-if="items.length" class="donut-card__body">
-      <div class="category-donut-chart">
-        <svg
-          viewBox="0 0 240 240"
-          class="category-donut-chart__svg"
-          aria-label="지출 카테고리 분포"
-          @mouseleave="emit('leave-category')"
-        >
-          <path
-            v-for="segment in chartSegments"
-            :key="segment.categoryId"
-            :d="segment.path"
-            :fill="segment.color"
-            class="category-donut-chart__segment"
-            :class="{ 'category-donut-chart__segment--active': segment.active }"
-            @mouseenter="emitHoverCategory(segment.categoryId, $event)"
-            @mousemove="emitHoverCategory(segment.categoryId, $event)"
-            @click="emitHoverCategory(segment.categoryId, $event)"
-          />
-        </svg>
-
-        <div class="category-donut-chart__center">
-          <p class="category-donut-chart__month">{{ formatMonthLabel }}</p>
-          <strong class="category-donut-chart__share">{{ activeShare }}%</strong>
-        </div>
-      </div>
-
-      <ul class="donut-card__legend">
-        <li
-          v-for="item in items"
-          :key="item.categoryId"
-          class="donut-card__legend-item"
-          :class="{ 'donut-card__legend-item--active': item.categoryId === props.activeCategoryId }"
-        >
-          <span class="donut-card__swatch" :style="{ backgroundColor: item.color }" />
-          <span class="donut-card__legend-label">{{ item.name }}</span>
-        </li>
-      </ul>
-    </div>
-
-    <div v-else class="category-donut-chart category-donut-chart--empty">
-      <p>해당 월의 지출 데이터가 없어요.</p>
-    </div>
-  </article>
-</template>
 
 <style scoped>
 @import '@/assets/color.css';

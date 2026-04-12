@@ -1,4 +1,48 @@
-﻿<script setup>
+﻿<template>
+  <article class="trend-card">
+    <div class="trend-card__header">
+      <div>
+        <h2 class="trend-card__title">월별 소비 추이</h2>
+        <p class="trend-card__description">
+          {{ descriptionMap[props.selectedMetric] ?? descriptionMap.all }}
+        </p>
+      </div>
+
+      <div class="trend-card__legend">
+        <span v-for="series in visibleSeries" :key="series.key" class="trend-card__legend-item">
+          <span class="trend-card__legend-dot" :style="{ backgroundColor: series.color }" />
+          {{ series.label }}
+        </span>
+      </div>
+    </div>
+
+    <div v-if="monthlyData.length" class="trend-chart">
+      <div v-for="item in monthlyData" :key="item.monthKey" class="trend-chart__group">
+        <div
+          class="trend-chart__bars"
+          :class="{ 'trend-chart__bars--single': getRenderedSeries(item).length === 1 }"
+        >
+          <div
+            v-for="series in getRenderedSeries(item)"
+            :key="series.key"
+            class="trend-chart__bar-wrap"
+            :data-tooltip="`${item.label} ${series.label} ${formatCurrency(getSeriesValue(item, series.key))}`"
+          >
+            <div
+              class="trend-chart__bar"
+              :style="getBarStyle(getSeriesValue(item, series.key), series.color)"
+            />
+          </div>
+        </div>
+        <div class="trend-chart__label">{{ item.label }}</div>
+      </div>
+    </div>
+
+    <div v-else class="trend-card__empty">표시할 데이터가 없어요.</div>
+  </article>
+</template>
+
+<script setup>
 import { computed } from 'vue'
 
 const props = defineProps({
@@ -87,50 +131,6 @@ const getBarStyle = (value, color) => {
 const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}원`
 </script>
 
-<template>
-  <article class="trend-card">
-    <div class="trend-card__header">
-      <div>
-        <h2 class="trend-card__title">월별 소비 추이</h2>
-        <p class="trend-card__description">
-          {{ descriptionMap[props.selectedMetric] ?? descriptionMap.all }}
-        </p>
-      </div>
-
-      <div class="trend-card__legend">
-        <span v-for="series in visibleSeries" :key="series.key" class="trend-card__legend-item">
-          <span class="trend-card__legend-dot" :style="{ backgroundColor: series.color }" />
-          {{ series.label }}
-        </span>
-      </div>
-    </div>
-
-    <div v-if="monthlyData.length" class="trend-chart">
-      <div v-for="item in monthlyData" :key="item.monthKey" class="trend-chart__group">
-        <div
-          class="trend-chart__bars"
-          :class="{ 'trend-chart__bars--single': getRenderedSeries(item).length === 1 }"
-        >
-          <div
-            v-for="series in getRenderedSeries(item)"
-            :key="series.key"
-            class="trend-chart__bar-wrap"
-            :data-tooltip="`${item.label} ${series.label} ${formatCurrency(getSeriesValue(item, series.key))}`"
-          >
-            <div
-              class="trend-chart__bar"
-              :style="getBarStyle(getSeriesValue(item, series.key), series.color)"
-            />
-          </div>
-        </div>
-        <div class="trend-chart__label">{{ item.label }}</div>
-      </div>
-    </div>
-
-    <div v-else class="trend-card__empty">표시할 데이터가 없어요.</div>
-  </article>
-</template>
-
 <style scoped>
 @import '@/assets/color.css';
 
@@ -209,11 +209,10 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
   border-radius: 24px;
   background:
     linear-gradient(to top, rgba(23, 25, 28, 0.04) 1px, transparent 1px) 0 100% / 100% 25%,
-    #fafafb;
+    var(--black-4);
 }
 
 .trend-chart__bars--single {
-  display: flex;
   justify-content: center;
 }
 
