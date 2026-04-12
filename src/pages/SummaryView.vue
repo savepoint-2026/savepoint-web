@@ -2,27 +2,29 @@
   <section ref="summaryViewRef" class="summary-view">
     <ComparisonTooltip :comparison="hoveredComparison" :position="tooltipPosition" />
 
-    <div class="summary-toolbar">
-      <div class="metric-toggle" role="tablist" aria-label="지표 선택">
-        <button
-          v-for="type in metricTypes"
-          :key="type.value"
-          type="button"
-          class="metric-toggle__button"
-          :class="{ 'metric-toggle__button--active': selectedMetric === type.value }"
-          @click="handleMetricClick(type.value)"
-        >
-          {{ type.label }}
-        </button>
-      </div>
-    </div>
-
     <div class="summary-content">
       <section class="summary-content__left">
-        <TrendBarChart
-          :monthly-data="recentThreeMonthStats"
-          :selected-metric="selectedMetric"
-        />
+        <div class="summary-trend-block">
+          <div class="summary-toolbar">
+            <div class="metric-toggle" role="tablist" aria-label="지표 선택">
+              <button
+                v-for="type in metricTypes"
+                :key="type.value"
+                type="button"
+                class="metric-toggle__button"
+                :class="{ 'metric-toggle__button--active': selectedMetric === type.value }"
+                @click="handleMetricClick(type.value)"
+              >
+                {{ type.label }}
+              </button>
+            </div>
+          </div>
+
+          <TrendBarChart
+            :monthly-data="recentThreeMonthStats"
+            :selected-metric="selectedMetric"
+          />
+        </div>
 
         <div class="monthly-summary-list">
           <article
@@ -409,6 +411,11 @@ onMounted(() => {
   display: grid;
   gap: 14px;
   align-content: start;
+}
+
+.summary-trend-block {
+  display: grid;
+  gap: 8px;
 }
 
 .metric-toggle {
