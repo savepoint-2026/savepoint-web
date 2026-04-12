@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
+const BASE_URL = 'http://localhost:3000/users'
+
 export const useUserStore = defineStore('user', {
   state: () => ({
     loading: true, // userData 사용하는 컴포넌트에 v-if="!loading"
@@ -93,6 +95,52 @@ export const useUserStore = defineStore('user', {
     initModifyData() {
       this.userModifyData = this.userData
       this.goalModifyData = this.goalData
+    },
+
+    async updateGroupId(userId, groupId) {
+      console.log(userId, groupId)
+      try {
+        await axios.patch(`${BASE_URL}/${userId}`, { groupId: groupId })
+        this.userData = { ...this.userData, groupId }
+        this.userModifyData = { ...this.userModifyData, groupId }
+      } catch (error) {
+        console.error('Error updating group ID:', error)
+        return
+      }
+    },
+
+    async fetchUsersInfo(userIds) {
+      try {
+        let runnersInfo = []
+        for (const userId of userIds) {
+          const response = await axios.get(`${BASE_URL}/${userId}`)
+          const userInfo = response.data
+          runnersInfo.push({
+            userId: userInfo.id,
+            name: userInfo.name,
+            profileImg: userInfo.profileImg,
+          })
+        }
+        return runnersInfo
+      } catch (error) {
+        console.error('Error fetching users info:', error)
+        return
+      }
+    },
+
+    async fetchUserData(userId) {
+      this.loading = true
+      try {
+        const response = await axios.get(`/api/users/${userId}`)
+        this.userData = response.data
+        this.userModifyData = response.data
+        return response.data
+      } catch (error) {
+        console.error(error)
+        return null
+      } finally {
+        this.loading = false
+      }
     },
   },
 })

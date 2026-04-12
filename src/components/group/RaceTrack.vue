@@ -1,11 +1,15 @@
 <template>
   <section class="race-track-wrap">
     <header class="race-header">
-      <h2 class="fw-black text-black-1 header-title">👑 이달의 절약왕: {{}} 👑</h2>
+      <h2 class="fw-black text-black-1 header-title">
+        👑 이달의 거지왕: {{ groupStore.maxRunner.name }} 👑
+      </h2>
 
       <div class="goal-box">
-        <p class="fw-bold text-black-2 goal-label">그룹 코드 {{}}</p>
-        <p class="fw-black text-red-1 goal-amount">{{}}</p>
+        <p class="fw-bold text-black-2 goal-label">그룹 코드 {{ groupStore.currentGroup.id }}</p>
+        <p class="fw-black text-red-1 goal-amount">
+          {{ toWon(groupStore.currentGroup.targetAmount) }}
+        </p>
       </div>
     </header>
 
@@ -13,47 +17,55 @@
       <div class="track-top">
         <div class="brand-row">
           <div class="brand-dot bg-yellow-2 justify-align">↗</div>
-          <span class="fw-black text-black-1 brand-text">$AVE POINT</span>
+          <span class="fw-black text-black-1 brand-text">{{ groupStore.currentGroup.name }}</span>
         </div>
+        <button class="leave-btn fw-bold" type="button" @click="onClickLeaveGroup">
+          그룹 나가기
+        </button>
       </div>
 
       <div class="lane-wrap">
         <div class="lane bg-black-3"></div>
-
-        <!-- TODO : runner.position (runner-amount)/(max - min) 퍼센티지로 변경 -->
         <div
-          v-for="runner in runners"
-          :key="runner.id"
+          v-for="runner in groupStore.runners"
+          :key="runner.userId"
           class="runner"
           :style="{ left: `${runner.position}%` }"
         >
           <span class="fw-bold value-chip" :class="runner.danger ? 'chip-danger' : 'chip-normal'">
             {{ toWon(runner.amount) }}
           </span>
-          <div class="avartar-wrap">
-            <div class="avatar">{{ runner.avatar }}</div>
-            <img class="status-icon" :src="runner.amount > limit ? SkullIcon : SmileIcon" alt="" />
+          <div class="profileImg-wrap">
+            <div class="profileImg">{{ runner.profileImg }}</div>
+            <img
+              class="status-icon"
+              :src="runner.amount > groupStore.currentGroup.targetAmount ? SkullIcon : SmileIcon"
+              alt=""
+            />
           </div>
           <p class="fw-bold text-black-1 runner-name" :class="{ 'text-red-1': runner.danger }">
             {{ runner.name }}
           </p>
         </div>
 
-        <div class="limit-line" :style="{ left: `${limitPosition}%` }"></div>
-        <span class="fw-bold text-black-4 limit-pill" :style="{ left: `${limitPosition}%` }">
-          LIMIT: 700k
+        <div class="limit-line" :style="{ left: `${groupStore.limitPosition}%` }"></div>
+        <span
+          class="fw-bold text-black-4 limit-pill"
+          :style="{ left: `${groupStore.limitPosition}%` }"
+        >
+          LIMIT: {{ toWon(groupStore.currentGroup.targetAmount) }}
         </span>
       </div>
 
       <div class="scale-row">
-        <span class="fw-bold text-black-2">0 원</span>
-        <span class="fw-bold text-black-2">{{ max }}</span>
+        <span class="fw-bold text-black-2">{{ toWon(groupStore.displayMin) }}</span>
+        <span class="fw-bold text-black-2">{{ toWon(groupStore.displayMax) }}</span>
       </div>
 
       <div class="legend bg-yellow-2">
         <div class="legend-item">
           <img :src="SmileIcon" width="15" height="15" alt="safe" />
-          <span class="fw-medium text-black-1">안전 구역 (절약왕 후보)</span>
+          <span class="fw-medium text-black-1">안전 구역 (거지왕 후보)</span>
         </div>
         <div class="legend-item">
           <img :src="SkullIcon" width="15" height="15" alt="danger" />
@@ -67,20 +79,29 @@
 <script setup>
 import SkullIcon from '@/assets/icons/group/group-skull.png'
 import SmileIcon from '@/assets/icons/group/group-smile.png'
+import { useAuthStore } from '@/stores/useAuthStore'
+import { useGroupStore } from '@/stores/useGroupStore'
+import { useUserStore } from '@/stores/useUserStore'
 
-const limitPosition = 70
-const limit = 700000
+const authStore = useAuthStore()
+const groupStore = useGroupStore()
+const userStore = useUserStore()
 
-//TODO: runners 변경
-const runners = [
-  { id: 1, name: '이유주', amount: 300000, position: 30, avatar: '👩🏻', danger: false },
-  { id: 2, name: '하성민', amount: 400000, position: 45, avatar: '🧑🏻', danger: false },
-  { id: 3, name: '여강휘', amount: 500000, position: 58, avatar: '👩🏻', danger: false },
-  { id: 4, name: '김민서', amount: 720000, position: 73, avatar: '🧑🏻', danger: true },
-  { id: 5, name: '김지연', amount: 850000, position: 87, avatar: '👩🏻', danger: true },
-]
-
+// 금액을 원 단위로 포맷팅하는 method
 const toWon = (value) => `${value.toLocaleString('ko-KR')} 원`
+
+const onClickLeaveGroup = async () => {
+  const userId = authStore.currentUserId
+  const groupId = groupStore.currentGroup.id
+
+  if (!userId || !groupId) return
+
+  const isConfirmed = window.confirm('정말 그룹에서 나가시겠어요?')
+  if (!isConfirmed) return
+
+  await groupStore.leaveGroup(userId, groupId)
+  await userStore.updateGroupId(userId, '')
+}
 </script>
 
 <style scoped>
@@ -98,7 +119,7 @@ const toWon = (value) => `${value.toLocaleString('ko-KR')} 원`
   gap: 20px;
 }
 
-.avatar-wrap {
+.profileImg-wrap {
   position: relative;
   width: fit-content;
 }
@@ -146,6 +167,26 @@ const toWon = (value) => `${value.toLocaleString('ko-KR')} 원`
   justify-content: space-between;
   gap: 20px;
   align-items: center;
+}
+
+.leave-btn {
+  border: 1px solid var(--black-2);
+  background-color: transparent;
+  color: var(--black-2);
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.leave-btn:hover {
+  background-color: var(--red-1);
+  border-color: var(--red-1);
+  color: var(--black-4);
 }
 
 .brand-row {
@@ -217,7 +258,7 @@ const toWon = (value) => `${value.toLocaleString('ko-KR')} 원`
   background-color: var(--red-1);
 }
 
-.avatar {
+.profileImg {
   width: 48px;
   height: 48px;
   border-radius: 999px;
@@ -282,20 +323,6 @@ const toWon = (value) => `${value.toLocaleString('ko-KR')} 원`
   font-size: 13px;
 }
 
-/* @media (max-width: 1440px) {
-  .header-title {
-    font-size: 28px;
-  }
-
-  .goal-amount {
-    font-size: 32px;
-  }
-
-  .brand-text {
-    font-size: 26px;
-  }
-} */
-
 @media (max-width: 1080px) {
   .race-header {
     flex-direction: column;
@@ -316,7 +343,15 @@ const toWon = (value) => `${value.toLocaleString('ko-KR')} 원`
     height: auto;
     padding: 14px;
     gap: 8px;
+    align-items: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .legend {
     align-items: flex-start;
+    flex-direction: row;
+    gap: 6px;
   }
 }
 </style>
