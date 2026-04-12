@@ -184,7 +184,7 @@ const emitHoverCategory = (categoryId, event) => {
 
 .donut-card__body {
   display: grid;
-  grid-template-columns: 256px minmax(0, 1fr);
+  grid-template-columns: minmax(220px, 256px) minmax(0, 1fr);
   gap: 18px;
   align-items: center;
   margin-top: 14px;
@@ -192,8 +192,9 @@ const emitHoverCategory = (categoryId, event) => {
 
 .category-donut-chart {
   position: relative;
-  width: 256px;
-  height: 248px;
+  width: min(100%, 256px);
+  aspect-ratio: 1 / 1;
+  height: auto;
   margin: 0 auto;
 }
 
@@ -220,7 +221,7 @@ const emitHoverCategory = (categoryId, event) => {
 
 .category-donut-chart__center {
   position: absolute;
-  inset: 64px;
+  inset: clamp(56px, 25%, 64px);
   border-radius: 50%;
   background: #ffffff;
   display: flex;
@@ -289,9 +290,10 @@ const emitHoverCategory = (categoryId, event) => {
   color: var(--black-2);
   font-size: 15px;
   font-weight: 700;
+  word-break: keep-all;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .donut-card {
     min-height: auto;
     padding: 20px 18px 18px;
@@ -303,12 +305,11 @@ const emitHoverCategory = (categoryId, event) => {
   }
 
   .category-donut-chart {
-    width: 248px;
-    height: 248px;
+    width: min(100%, 240px);
   }
 
   .category-donut-chart__center {
-    inset: 64px;
+    inset: clamp(56px, 26%, 62px);
   }
 }
 </style>

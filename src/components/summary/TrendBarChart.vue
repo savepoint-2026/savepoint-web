@@ -20,7 +20,10 @@
       <div v-for="item in monthlyData" :key="item.monthKey" class="trend-chart__group">
         <div
           class="trend-chart__bars"
-          :class="{ 'trend-chart__bars--single': getRenderedSeries(item).length === 1 }"
+          :class="{
+            'trend-chart__bars--single': getRenderedSeries(item).length === 1,
+            'trend-chart__bars--dense': getRenderedSeries(item).length >= 3,
+          }"
         >
           <div
             v-for="series in getRenderedSeries(item)"
@@ -130,7 +133,6 @@ const getBarStyle = (value, color) => {
 
 const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}원`
 </script>
-
 <style scoped>
 @import '@/assets/color.css';
 
@@ -153,7 +155,7 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
 .trend-card__title {
   margin: 0;
   color: var(--black-1);
-  font-size: 24px;
+  font-size: clamp(20px, 1.8vw, 24px);
   font-weight: 800;
 }
 
@@ -205,7 +207,7 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
   justify-content: center;
   gap: 16px;
   align-items: stretch;
-  padding: 14px 20px 0;
+  padding: 14px clamp(12px, 1.4vw, 20px) 0;
   border-radius: 24px;
   background:
     linear-gradient(to top, rgba(23, 25, 28, 0.04) 1px, transparent 1px) 0 100% / 100% 25%,
@@ -226,7 +228,7 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
 }
 
 .trend-chart__bar {
-  width: 30px;
+  width: clamp(18px, 2.1vw, 30px);
   max-width: 100%;
   border-radius: 10px 10px 4px 4px;
   min-height: 6px;
@@ -329,28 +331,42 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .trend-card {
     min-height: auto;
-    padding: 18px 18px 14px;
+    padding: 16px 16px 12px;
   }
 
   .trend-card__header {
     flex-direction: column;
+    gap: 12px;
   }
 
   .trend-chart {
-    gap: 10px;
-    min-height: 230px;
+    gap: 8px;
+    min-height: 214px;
+  }
+
+  .trend-chart__group {
+    gap: 8px;
   }
 
   .trend-chart__bars {
-    min-height: 188px;
-    padding: 14px 16px 0;
+    min-height: 172px;
+    gap: 8px;
+    padding: 12px 8px 0;
   }
 
   .trend-chart__bar {
-    width: 24px;
+    width: 20px;
+  }
+
+  .trend-chart__bars--dense .trend-chart__bar {
+    width: 16px;
+  }
+
+  .trend-chart__label {
+    font-size: 12px;
   }
 }
 </style>
