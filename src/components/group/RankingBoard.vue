@@ -52,7 +52,7 @@ const safeRows = computed(() => {
 const dangerRows = computed(() => {
   return rankedRunners.value.filter((runner) => runner.danger === true)
 })
-const toWon = (value) => `${value.toLocaleString('ko-KR')} ₩`
+const toWon = (value) => `${value.toLocaleString('ko-KR')} 원`
 </script>
 
 <style scoped>
