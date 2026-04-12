@@ -368,5 +368,10 @@ const formatCurrency = (value) => `${Number(value ?? 0).toLocaleString('ko-KR')}
   .trend-chart__label {
     font-size: 12px;
   }
+
+  .trend-chart__bar-wrap::after,
+  .trend-chart__bar-wrap::before {
+    display: none;
+  }
 }
 </style>
