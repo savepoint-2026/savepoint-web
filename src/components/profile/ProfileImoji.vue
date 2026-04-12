@@ -58,4 +58,17 @@ const onSelectEmoji = (emoji) => {
   font-size: 14px !important;
   line-height: 1.2;
 }
+
+@media (max-width: 768px) {
+  .imoji-box {
+    width: 100px;
+    height: 100px;
+
+    font-size: 60px;
+  }
+
+  .picker-wrapper {
+    top: 112px;
+  }
+}
 </style>

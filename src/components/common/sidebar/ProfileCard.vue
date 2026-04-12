@@ -7,7 +7,7 @@
     </p>
   </div>
   <div class="profile-card bg-yellow-2 border-yellow-1 justify-align" v-else>
-    <p class="text-black-1 fw-black">로그인 후 이용 가능합니다</p>
+    <p class="not-logged text-black-1 fw-black">로그인 후 이용 가능합니다</p>
   </div>
 </template>
 
@@ -83,6 +83,12 @@ p {
   .hello {
     font-size: 14px;
     align-self: start;
+  }
+
+  .not-logged {
+    grid-row: 1 / 3;
+    grid-column: 1 / 3;
+    justify-self: center;
   }
 }
 </style>

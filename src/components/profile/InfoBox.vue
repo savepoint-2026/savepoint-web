@@ -24,4 +24,10 @@ import InfoItem from './InfoItem.vue'
 
   margin-top: 48px;
 }
+
+@media (max-width: 768px) {
+  .info-box {
+    margin: 24px 0;
+  }
+}
 </style>

@@ -25,4 +25,10 @@ const userStore = useUserStore()
   display: flex;
   gap: 36px;
 }
+
+@media (max-width: 768px) {
+  .goal-modify {
+    flex-direction: column;
+  }
+}
 </style>

@@ -23,4 +23,10 @@ const userStore = useUserStore()
   display: flex;
   gap: 14px;
 }
+
+@media (max-width: 768px) {
+  .button-box {
+    align-self: end;
+  }
+}
 </style>

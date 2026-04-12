@@ -19,4 +19,11 @@ import AuthButton from './AuthButton.vue'
   justify-self: end;
   align-items: end;
 }
+
+@media (max-width: 768px) {
+  .auth-box {
+    gap: 8px;
+    justify-content: center;
+  }
+}
 </style>

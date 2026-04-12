@@ -48,4 +48,17 @@ input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+@media (max-width: 768px) {
+  .goal-input {
+    width: 100%;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  input {
+    width: 100%;
+    font-size: 16px;
+  }
+}
 </style>
