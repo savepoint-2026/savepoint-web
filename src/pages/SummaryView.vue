@@ -385,7 +385,7 @@ onMounted(() => {
   overflow: visible;
   display: grid;
   gap: 12px;
-  padding-right: 4px;
+  padding-inline: 4px;
   padding-bottom: 8px;
 }
 
@@ -399,7 +399,7 @@ onMounted(() => {
 
 .summary-content {
   display: grid;
-  grid-template-columns: minmax(0, 1.28fr) minmax(372px, 0.92fr);
+  grid-template-columns: minmax(0, 1.28fr) minmax(320px, 0.92fr);
   gap: 18px;
   align-items: start;
 }
@@ -453,7 +453,7 @@ onMounted(() => {
 
 .monthly-summary-card {
   display: grid;
-  grid-template-columns: 64px minmax(0, 1fr) 160px 160px;
+  grid-template-columns: 64px minmax(0, 1fr) minmax(132px, 160px) minmax(132px, 160px);
   align-items: center;
   gap: 14px;
   padding: 18px 22px;
@@ -567,13 +567,13 @@ onMounted(() => {
 
 .category-row__name {
   color: var(--black-1);
-  font-size: 19px;
+  font-size: clamp(16px, 1.2vw, 19px);
   font-weight: 700;
 }
 
 .category-row__amount {
   color: var(--black-1);
-  font-size: 19px;
+  font-size: clamp(16px, 1.2vw, 19px);
   font-weight: 800;
 }
 
@@ -589,7 +589,7 @@ onMounted(() => {
   }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .summary-toolbar {
     align-items: stretch;
     flex-direction: column;
@@ -604,8 +604,38 @@ onMounted(() => {
     padding: 16px 18px;
   }
 
+  .monthly-summary-card__title {
+    font-size: 16px;
+  }
+
+  .monthly-summary-card__metric {
+    grid-column: 2 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .monthly-summary-card__label {
+    margin-bottom: 0;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .monthly-summary-card__income,
+  .monthly-summary-card__expense {
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
   .category-row {
     padding: 13px 12px;
+  }
+
+  .category-row__name,
+  .category-row__amount {
+    font-size: 16px;
+    word-break: keep-all;
   }
 }
 </style>
