@@ -38,7 +38,7 @@
             />
           </div>
           <div class="tx-info">
-            <span class="tx-memo fw-semibold text-black-1">{{ tx.memo ?? '-' }}</span>
+            <span class="tx-memo fw-semibold text-black-1">{{ tx.memo || getCategoryInfo(tx.categoryId).name }}</span>
             <span class="tx-date fw-regular text-black-2">{{ formatDate(tx.date) }}</span>
           </div>
           <span
@@ -58,9 +58,28 @@
 
         <div v-if="editingId === tx.id" class="edit-form">
           <div class="edit-row">
+            <label class="edit-label fw-medium text-black-2">날짜</label>
+            <input v-model="editForm.date" type="date" class="edit-input fw-regular" />
+          </div>
+          <div class="edit-row">
+            <label class="edit-label fw-medium text-black-2">타입</label>
+            <div class="edit-type-toggle">
+              <button
+                class="type-btn fw-medium"
+                :class="editForm.type === 'income' ? 'type-active-income' : 'type-inactive'"
+                @click.stop="handleEditTypeChange('income')"
+              >수입</button>
+              <button
+                class="type-btn fw-medium"
+                :class="editForm.type === 'expense' ? 'type-active-expense' : 'type-inactive'"
+                @click.stop="handleEditTypeChange('expense')"
+              >지출</button>
+            </div>
+          </div>
+          <div class="edit-row">
             <label class="edit-label fw-medium text-black-2">카테고리</label>
             <select v-model="editForm.categoryId" class="edit-select fw-regular">
-              <option v-for="cat in filteredCategories(tx.type)" :key="cat.id" :value="cat.id">
+              <option v-for="cat in filteredCategories(editForm.type)" :key="cat.id" :value="cat.id">
                 {{ cat.name }}
               </option>
             </select>
@@ -107,7 +126,7 @@ const userStore = useUserStore()
 
 const selectedId = ref(null)
 const editingId = ref(null)
-const editForm = ref({ memo: '', amount: 0, categoryId: '' })
+const editForm = ref({ date: '', type: 'expense', memo: '', amount: 0, categoryId: '' })
 
 onMounted(async () => {
   const now = dayjs()
@@ -141,7 +160,18 @@ function toggleSelected(id) {
 
 function startEdit(tx) {
   editingId.value = tx.id
-  editForm.value = { memo: tx.memo ?? '', amount: tx.amount, categoryId: tx.categoryId }
+  editForm.value = {
+    date: tx.date,
+    type: tx.type,
+    memo: tx.memo ?? '',
+    amount: tx.amount,
+    categoryId: tx.categoryId,
+  }
+}
+
+function handleEditTypeChange(newType) {
+  editForm.value.type = newType
+  editForm.value.categoryId = newType === 'income' ? 'c1' : 'c3'
 }
 
 function cancelEdit() {
@@ -150,6 +180,8 @@ function cancelEdit() {
 
 async function submitEdit(id) {
   await transactionStore.updateTransaction(id, {
+    date: editForm.value.date,
+    type: editForm.value.type,
     memo: editForm.value.memo,
     amount: editForm.value.amount,
     categoryId: editForm.value.categoryId,
@@ -374,6 +406,36 @@ function formatAmount(type, amount) {
   display: flex;
   gap: 8px;
   margin-top: 4px;
+}
+
+.edit-type-toggle {
+  display: flex;
+  flex: 1;
+  gap: 6px;
+}
+
+.type-btn {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.type-active-income {
+  background-color: var(--green-2);
+  color: #1a7a6e;
+}
+
+.type-active-expense {
+  background-color: var(--red-2);
+  color: var(--red-1);
+}
+
+.type-inactive {
+  background-color: var(--black-3);
+  color: var(--black-2);
 }
 
 /* 모바일 반응형 */
