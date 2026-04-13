@@ -134,11 +134,13 @@
 import { reactive, computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTransactionStore } from '@/stores/useTransactionStore'
+import { useUserStore } from '@/stores/useUserStore'
 import axios from 'axios'
 import dayjs from 'dayjs'
 
 const router = useRouter()
 const store = useTransactionStore()
+const userStore = useUserStore()
 
 const dateInput = ref(null)
 
@@ -190,7 +192,7 @@ const handleSave = async () => {
 
   const pureRecord = {
     id: `t${Date.now()}`,
-    userId: 'u1',
+    userId: userStore.userData.id,
     categoryId: form.categoryId,
     date: form.date,
     type: form.type,

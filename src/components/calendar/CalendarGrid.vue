@@ -47,9 +47,11 @@
 <script setup>
 import { computed } from 'vue'
 import { useTransactionStore } from '@/stores/useTransactionStore'
+import { useUserStore } from '@/stores/useUserStore'
 import dayjs from 'dayjs'
 
 const store = useTransactionStore()
+const userStore = useUserStore()
 
 // 요일 배열 및 색상 지정 (일요일 빨강, 토요일 파랑)
 const weekDays = ['일', '월', '화', '수', '목', '금', '토']
@@ -92,7 +94,9 @@ const selectDate = (dateString) => {
 
   if (oldMonth !== newMonth) {
     const year = dayjs(dateString).year()
-    store.fetchMonthlyTransactions('u1', year, newMonth + 1)
+    const currentUserId = userStore.userData.id
+
+    store.fetchMonthlyTransactions(currentUserId, year, newMonth + 1)
   }
 }
 </script>

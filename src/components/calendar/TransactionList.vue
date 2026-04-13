@@ -93,6 +93,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useTransactionStore } from '@/stores/useTransactionStore'
+import { useUserStore } from '@/stores/useUserStore'
 import dayjs from 'dayjs'
 import iconHistory from '@/assets/icons/category/category-history.png'
 import { getCategoryInfo, getCategoriesByType } from '@/constants/categories'
@@ -101,17 +102,18 @@ function filteredCategories(type) {
   return getCategoriesByType(type)
 }
 
-// TODO: useUserStore 연결 후 실제 userId로 교체
-const DUMMY_USER_ID = 'u1'
-
 const transactionStore = useTransactionStore()
+const userStore = useUserStore()
+
 const selectedId = ref(null)
 const editingId = ref(null)
 const editForm = ref({ memo: '', amount: 0, categoryId: '' })
 
 onMounted(async () => {
   const now = dayjs()
-  await transactionStore.fetchMonthlyTransactions(DUMMY_USER_ID, now.year(), now.month() + 1)
+  const currentUserId = userStore.id
+
+  await transactionStore.fetchMonthlyTransactions(currentUserId, now.year(), now.month() + 1)
 })
 
 const displayedTransactions = computed(() => {
