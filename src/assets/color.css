@@ -1,0 +1,164 @@
+/* =========================
+  색상 변수
+========================= */
+:root {
+  /* Yellow */
+  --yellow-1: #ffdab9;
+  --yellow-2: #fff7f0;
+
+  /* Green */
+  --green-1: #83d8c8;
+  --green-2: #b8e0d2;
+  --green-3: #f5faf9;
+
+  /* Blue */
+  --blue-1: #aec6f3;
+  --blue-2: #5a5afc;
+
+  /* Red */
+  --red-1: #e84f4f;
+  --red-2: #f8c8dc;
+  --red-3: #fdedf3;
+
+  /* Orange */
+  --orange-1: #e76e50;
+
+  /* Purple */
+  --purple-1: #d8bfd8;
+
+  /* Black */
+  --black-1: #17191c;
+  --black-2: #5a5f68;
+  --black-3: #f4f4f6;
+  --black-4: #fafafb;
+}
+
+/* =========================
+  텍스트 컬러
+========================= */
+.text-yellow-1 {
+  color: var(--yellow-1);
+}
+.text-yellow-2 {
+  color: var(--yellow-2);
+}
+
+.text-green-1 {
+  color: var(--green-1);
+}
+.text-green-2 {
+  color: var(--green-2);
+}
+.text-green-3 {
+  color: var(--green-3);
+}
+
+.text-blue-1 {
+  color: var(--blue-1);
+}
+.text-blue-2 {
+  color: var(--blue-2);
+}
+
+.text-red-1 {
+  color: var(--red-1);
+}
+.text-red-2 {
+  color: var(--red-2);
+}
+.text-red-3 {
+  color: var(--red-3);
+}
+
+.text-orange-1 {
+  color: var(--orange-1);
+}
+.text-purple-1 {
+  color: var(--purple-1);
+}
+
+.text-black-1 {
+  color: var(--black-1);
+}
+.text-black-2 {
+  color: var(--black-2);
+}
+.text-black-3 {
+  color: var(--black-3);
+}
+.text-black-4 {
+  color: var(--black-4);
+}
+
+/* =========================
+  배경 컬러
+========================= */
+.bg-yellow-1 {
+  background-color: var(--yellow-1);
+}
+.bg-yellow-2 {
+  background-color: var(--yellow-2);
+}
+
+.bg-green-1 {
+  background-color: var(--green-1);
+}
+.bg-green-2 {
+  background-color: var(--green-2);
+}
+.bg-green-3 {
+  background-color: var(--green-3);
+}
+
+.bg-blue-1 {
+  background-color: var(--blue-1);
+}
+
+.bg-red-1 {
+  background-color: var(--red-1);
+}
+.bg-red-2 {
+  background-color: var(--red-2);
+}
+.bg-red-3 {
+  background-color: var(--red-3);
+}
+
+.bg-orange-1 {
+  background-color: var(--orange-1);
+}
+.bg-purple-1 {
+  background-color: var(--purple-1);
+}
+
+.bg-black-1 {
+  background-color: var(--black-1);
+}
+.bg-black-2 {
+  background-color: var(--black-2);
+}
+.bg-black-3 {
+  background-color: var(--black-3);
+}
+.bg-black-4 {
+  background-color: var(--black-4);
+}
+
+/* =========================
+  테두리 컬러
+========================= */
+.border-yellow-1 {
+  border-color: var(--yellow-1);
+}
+.border-green-1 {
+  border-color: var(--green-1);
+}
+.border-blue-1 {
+  border-color: var(--blue-1);
+}
+.border-red-1 {
+  border-color: var(--red-1);
+}
+.border-black-2 {
+  border-color: var(--black-2);
+}

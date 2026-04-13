@@ -1,0 +1,51 @@
+body {
+  margin: 0;
+  -ms-overflow-style: none;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+input:focus {
+  outline: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.box-default {
+  background-color: white;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.07);
+  border-radius: 24px;
+}
+
+.justify-align {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.orange-btn {
+  width: 156px;
+  height: 56px;
+  background-color: #ffdab9;
+  color: 17191C;
+  border-radius: 22px;
+  box-shadow: 0px 8px 16px rgba(255, 218, 185, 0.3);
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.orange-btn:hover {
+  background-color: #fff7f0;
+  color: #5a5f68;
+}
