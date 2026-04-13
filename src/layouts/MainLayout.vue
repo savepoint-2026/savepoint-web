@@ -39,7 +39,7 @@ provide('isMobile', isMobile)
 <style scoped>
 .container {
   width: 100%;
-  height: 100%;
+  height: 100dvh;
   min-height: 100dvh;
   background-color: #f9fafa;
   padding: 0;
@@ -55,6 +55,7 @@ provide('isMobile', isMobile)
   margin-left: 320px;
   padding: 72px 48px;
   box-sizing: border-box;
+  min-height: 100dvh;
 }
 
 .router-container.mobile {
