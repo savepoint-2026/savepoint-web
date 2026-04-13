@@ -111,4 +111,29 @@ const summary = computed(() => {
   font-size: 11px;
   font-weight: 600;
 }
+
+@media (max-width: 768px) {
+  .comparison-tooltip {
+    width: min(200px, calc(100vw - 28px));
+    min-height: 46px;
+    padding: 8px 10px;
+    border-radius: 16px;
+  }
+
+  .comparison-tooltip__icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 10px;
+    font-size: 12px;
+  }
+
+  .comparison-tooltip__title {
+    font-size: 12px;
+  }
+
+  .comparison-tooltip__summary {
+    margin-top: 2px;
+    font-size: 10px;
+  }
+}
 </style>

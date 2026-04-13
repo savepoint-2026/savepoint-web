@@ -3,7 +3,7 @@
     <div class="donut-card__header">
       <div>
         <h2 class="donut-card__title">어디에 많이 썼을까?</h2>
-        <p class="donut-card__description">각 항목에 마우스를 올려보세요!</p>
+        <p class="donut-card__description">{{ interactionGuideText }}</p>
       </div>
     </div>
 
@@ -13,6 +13,7 @@
           viewBox="0 0 240 240"
           class="category-donut-chart__svg"
           aria-label="지출 카테고리 분포"
+          @mousemove="handleChartMouseMove"
           @mouseleave="emit('leave-category')"
         >
           <path
@@ -54,7 +55,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, inject, ref } from 'vue'
 
 const emit = defineEmits(['hover-category', 'leave-category'])
 
@@ -72,6 +73,12 @@ const props = defineProps({
     default: '',
   },
 })
+
+const isMobile = inject('isMobile', ref(false))
+
+const interactionGuideText = computed(() =>
+  isMobile.value ? '각 항목을 클릭해보세요!' : '각 항목에 마우스를 올려보세요!',
+)
 
 const totalAmount = computed(() =>
   props.items.reduce((sum, item) => sum + Number(item.amount || 0), 0),
@@ -153,6 +160,14 @@ const emitHoverCategory = (categoryId, event) => {
     clientX: event.clientX ?? targetRect?.left + targetRect?.width / 2 ?? 0,
     clientY: event.clientY ?? targetRect?.top + targetRect?.height / 2 ?? 0,
   })
+}
+
+// 도넛 영역 내부라도 segment(path) 밖으로 벗어나면 즉시 hover 상태를 해제
+const handleChartMouseMove = (event) => {
+  const hoveredSegment = event.target?.closest?.('.category-donut-chart__segment')
+  if (!hoveredSegment) {
+    emit('leave-category')
+  }
 }
 </script>
 
