@@ -44,13 +44,21 @@
           :style="{ left: `${group.position}%` }"
         >
           <template v-if="group.count === 1">
+            <div class="mobile-runner-labels">
+              <span
+                class="fw-black mobile-runner-label"
+                :style="{ backgroundColor: getRunnerTone(group.runner.amount) }"
+              >
+                {{ group.runner.profileImg }}
+              </span>
+            </div>
             <span
-              class="fw-bold value-chip"
+              class="fw-bold value-chip desktop-only"
               :class="group.runner.danger ? 'chip-danger' : 'chip-normal'"
             >
               {{ toWon(group.runner.amount) }}
             </span>
-            <div class="profileImg-wrap">
+            <div class="profileImg-wrap desktop-only">
               <div
                 class="profileImg"
                 :style="{ backgroundColor: getRunnerTone(group.runner.amount) }"
@@ -59,12 +67,12 @@
               </div>
             </div>
             <p
-              class="fw-bold runner-name"
+              class="fw-bold runner-name desktop-only"
               :style="{ color: group.runner.danger ? 'var(--red-1)' : 'var(--black-1)' }"
             >
               {{ group.runner.name }}
             </p>
-            <div class="status-icon-wrap">
+            <div class="status-icon-wrap desktop-only">
               <img
                 class="status-icon"
                 :src="
@@ -76,7 +84,18 @@
           </template>
 
           <template v-else>
-            <div class="cluster-chip-row">
+            <div class="mobile-runner-labels">
+              <span
+                v-for="member in group.runners"
+                :key="`${member.userId}-mobile-name`"
+                class="fw-black mobile-runner-label"
+                :style="{ backgroundColor: getRunnerTone(member.amount) }"
+              >
+                {{ member.profileImg }}
+              </span>
+            </div>
+
+            <div class="cluster-chip-row desktop-only">
               <span
                 v-for="member in group.runners"
                 :key="`${member.userId}-chip`"
@@ -87,7 +106,7 @@
               </span>
             </div>
 
-            <div class="cluster-stack">
+            <div class="cluster-stack desktop-only">
               <div
                 v-for="(member, idx) in group.runners.slice(0, 3)"
                 :key="`${member.userId}-bubble`"
@@ -103,7 +122,7 @@
               </div>
             </div>
 
-            <div class="cluster-names">
+            <div class="cluster-names desktop-only">
               <span
                 v-for="member in group.runners"
                 :key="`${member.userId}-name`"
@@ -126,8 +145,8 @@
       </div>
 
       <div class="scale-row">
-        <span class="fw-bold text-black-2">{{ toWon(groupStore.displayMin) }}</span>
-        <span class="fw-bold text-black-2">{{ toWon(groupStore.displayMax) }}</span>
+        <span class="fw-bold text-black-2 scale-min">{{ toWon(groupStore.displayMin) }}</span>
+        <span class="fw-bold text-black-2 scale-max">{{ toWon(groupStore.displayMax) }}</span>
       </div>
 
       <div class="legend bg-yellow-2">
@@ -364,7 +383,7 @@ const groupedRunners = computed(() => {
 .lane-wrap {
   position: relative;
   padding-top: 32px;
-  padding-bottom: 34px;
+  padding-bottom: 58px;
 }
 
 .lane {
@@ -419,6 +438,22 @@ const groupedRunners = computed(() => {
   gap: 4px;
 }
 
+.mobile-runner-labels {
+  display: none;
+}
+
+.mobile-runner-label {
+  font-size: 24px;
+  line-height: 1;
+  white-space: nowrap;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .lane-limit {
   position: absolute;
   top: 4px;
@@ -446,7 +481,7 @@ const groupedRunners = computed(() => {
 
 .limit-pill {
   position: absolute;
-  bottom: -34px;
+  bottom: 6px;
   transform: translateX(-50%);
   background-color: var(--red-1);
   color: var(--black-4);
@@ -574,6 +609,29 @@ const groupedRunners = computed(() => {
   font-size: 12px;
 }
 
+.scale-min,
+.scale-max {
+  position: relative;
+}
+
+.scale-min::before,
+.scale-max::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 8px);
+  width: 0;
+  height: 56px;
+  border-left: 2px dashed rgba(84, 91, 104, 0.35);
+}
+
+.scale-min::before {
+  left: 8px;
+}
+
+.scale-max::before {
+  right: 8px;
+}
+
 .legend {
   border-radius: 20px;
   height: 62px;
@@ -618,10 +676,43 @@ const groupedRunners = computed(() => {
 }
 
 @media (max-width: 768px) {
+  .lane-wrap {
+    padding-top: 20px;
+    padding-bottom: 64px;
+  }
+
+  .runner {
+    width: min(100%, 240px);
+    top: 43px;
+    transform: translate(-50%, -50%);
+  }
+
+  .desktop-only {
+    display: none !important;
+  }
+
+  .mobile-runner-labels {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 6px 16px;
+    max-width: 240px;
+  }
+
+  .legend {
+    display: none;
+  }
+
   .legend {
     align-items: flex-start;
     flex-direction: row;
     gap: 6px;
+  }
+
+  .scale-min::before,
+  .scale-max::before {
+    height: 56px;
   }
 }
 </style>
