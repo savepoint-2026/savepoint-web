@@ -2,7 +2,7 @@
   <section class="race-track-wrap">
     <header class="race-header">
       <h2 class="fw-black text-black-1 header-title">
-        👑 이달의 거지왕: {{ groupStore.minRunner.name }} 👑
+        👑 이달의 거지왕: {{ groupStore.maxRunner.name }} 👑
       </h2>
 
       <div class="goal-box">
@@ -47,7 +47,10 @@
               {{ toWon(group.runner.amount) }}
             </span>
             <div class="profileImg-wrap">
-              <div class="profileImg" :style="{ backgroundColor: getRunnerTone(group.runner.amount) }">
+              <div
+                class="profileImg"
+                :style="{ backgroundColor: getRunnerTone(group.runner.amount) }"
+              >
                 {{ group.runner.profileImg }}
               </div>
             </div>
@@ -179,12 +182,7 @@ const getRunnerTone = (amount) => {
 
 const getClusterOrbStyle = (amount, index, count) => {
   const limitedCount = Math.min(count, 3)
-  const offsets =
-    limitedCount === 2
-      ? [-18, 18]
-      : limitedCount === 3
-        ? [-24, 0, 24]
-        : [0]
+  const offsets = limitedCount === 2 ? [-18, 18] : limitedCount === 3 ? [-24, 0, 24] : [0]
 
   return {
     backgroundColor: getRunnerTone(amount),
@@ -374,9 +372,25 @@ const groupedRunners = computed(() => {
   width: 22px;
   border-radius: 999px 0 0 999px;
   background-image:
-    linear-gradient(45deg, var(--black-1) 25%, transparent 25%, transparent 75%, var(--black-1) 75%, var(--black-1)),
-    linear-gradient(45deg, var(--black-1) 25%, transparent 25%, transparent 75%, var(--black-1) 75%, var(--black-1));
-  background-position: 0 0, 6px 6px;
+    linear-gradient(
+      45deg,
+      var(--black-1) 25%,
+      transparent 25%,
+      transparent 75%,
+      var(--black-1) 75%,
+      var(--black-1)
+    ),
+    linear-gradient(
+      45deg,
+      var(--black-1) 25%,
+      transparent 25%,
+      transparent 75%,
+      var(--black-1) 75%,
+      var(--black-1)
+    );
+  background-position:
+    0 0,
+    6px 6px;
   background-size: 12px 12px;
   background-color: var(--black-4);
   opacity: 0.95;
