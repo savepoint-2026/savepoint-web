@@ -158,7 +158,7 @@ const toWon = (value) => `${value.toLocaleString('ko-KR')} 원`
   }
 
   .amount {
-    font-size: 29px;
+    font-size: 22px;
   }
 }
 
@@ -176,7 +176,7 @@ const toWon = (value) => `${value.toLocaleString('ko-KR')} 원`
   }
 
   .amount {
-    font-size: 22px;
+    font-size: 18px;
   }
 }
 </style>

@@ -183,7 +183,11 @@ const onClickCreate = async () => {
   width: 100%;
   align-items: center;
   justify-content: flex-end;
-  margin-top: 100px;
+  margin-top: auto;
+}
+
+.btn-group .orange-btn {
+  min-width: 148px;
 }
 
 .overlay {
@@ -203,6 +207,7 @@ const onClickCreate = async () => {
 
 .popup {
   transform: translateY(-8px);
+  width: 100%;
 }
 
 .form-card {
@@ -269,6 +274,7 @@ const onClickCreate = async () => {
   align-items: center;
   justify-content: center;
   gap: 12px;
+  min-width: 148px;
 }
 
 .labeled-row {
@@ -302,21 +308,119 @@ const onClickCreate = async () => {
 
 @media (max-width: 720px) {
   .manager-wrap {
-    align-items: start;
-    padding: 24px 0 16px;
+    align-items: stretch;
+    padding: 12px 0 16px;
+  }
+
+  .stage {
+    align-items: stretch;
   }
 
   .entry-card {
     max-width: none;
+    min-height: 260px;
+    padding: 32px 24px;
+    gap: 36px;
   }
 
   .card-title {
-    font-size: 30px;
+    font-size: 24px;
   }
 
   .form-card {
     width: calc(100% - 24px);
     padding: 24px 20px 26px;
+  }
+
+  .btn-group {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    margin-top: 28px;
+  }
+
+  .btn-group .orange-btn,
+  .action-btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .overlay {
+    left: 0;
+    padding: 16px;
+    align-items: flex-end;
+    background-color: rgba(23, 25, 28, 0.28);
+  }
+
+  .popup {
+    transform: translateY(0);
+  }
+
+  .form-card {
+    max-width: none;
+    border-radius: 28px 28px 22px 22px;
+  }
+
+  .card-head {
+    align-items: flex-start;
+  }
+
+  .card-subtitle {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .input-field {
+    height: 52px;
+    border-radius: 18px;
+    font-size: 16px;
+  }
+
+  .labeled-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .label {
+    width: auto;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 420px) {
+  .manager-wrap {
+    padding-top: 8px;
+  }
+
+  .entry-card {
+    min-height: 240px;
+    padding: 28px 18px;
+    gap: 28px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .overlay {
+    padding: 10px;
+  }
+
+  .form-card {
+    width: 100%;
+    padding: 20px 16px 22px;
+    gap: 18px;
+  }
+
+  .close-btn {
+    width: 24px;
+    height: 24px;
   }
 }
 </style>
