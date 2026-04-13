@@ -140,8 +140,8 @@ const onClickCreate = async () => {
   height: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
-  padding: 0 24px;
+  align-items: flex-start;
+  padding: 120px 24px 0;
   box-sizing: border-box;
 }
 
