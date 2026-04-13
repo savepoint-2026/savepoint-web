@@ -27,7 +27,11 @@
       <div class="lane-wrap">
         <div class="lane bg-black-3">
           <div class="lane-start-flag" aria-hidden="true"></div>
-          <div class="lane-limit" :style="{ left: `${groupStore.limitPosition}%` }">
+          <div
+            class="lane-limit"
+            :class="{ 'lane-limit-overflow': isLimitOverflow }"
+            :style="{ left: `${limitDisplayPosition}%` }"
+          >
             <span class="fw-bold lane-limit-label">
               LIMIT: {{ toWon(groupStore.currentGroup.targetAmount) }}
             </span>
@@ -114,7 +118,8 @@
 
         <span
           class="fw-bold text-black-4 limit-pill"
-          :style="{ left: `${groupStore.limitPosition}%` }"
+          :class="{ 'limit-pill-overflow': isLimitOverflow }"
+          :style="{ left: `${limitDisplayPosition}%` }"
         >
           LIMIT: {{ toWon(groupStore.currentGroup.targetAmount) }}
         </span>
@@ -190,6 +195,12 @@ const getClusterOrbStyle = (amount, index, count) => {
     zIndex: index + 1,
   }
 }
+
+const isLimitOverflow = computed(
+  () => groupStore.currentGroup.targetAmount > groupStore.displayMax && groupStore.displayMax > 0,
+)
+
+const limitDisplayPosition = computed(() => (isLimitOverflow.value ? 90 : groupStore.limitPosition))
 
 const groupedRunners = computed(() => {
   const sortedRunners = [...groupStore.runners].sort((a, b) => a.position - b.position)
@@ -418,6 +429,10 @@ const groupedRunners = computed(() => {
   pointer-events: none;
 }
 
+.lane-limit.lane-limit-overflow {
+  display: none;
+}
+
 .lane-limit-label {
   position: absolute;
   left: 50%;
@@ -453,6 +468,17 @@ const groupedRunners = computed(() => {
   border-left: 9px solid transparent;
   border-right: 9px solid transparent;
   border-bottom: 9px solid var(--red-1);
+}
+
+.limit-pill.limit-pill-overflow::before {
+  left: auto;
+  right: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-left: 13px solid var(--red-1);
+  border-right: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
 }
 
 .cluster-chip-row {
