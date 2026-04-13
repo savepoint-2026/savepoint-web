@@ -84,21 +84,22 @@ export const useGroupStore = defineStore('group', {
       try {
         const response = await axios.get(`${BASE_URL}/${groupId}`)
         const groupData = response.data
-        if (!groupData) {
-          alert('존재하지 않는 레이스입니다. 레이스 코드를 확인해주세요.')
-          return
-        }
+        console.log('그룹 데이터:', groupData)
+
         if (groupData.memberIds.length >= 5) {
           alert('레이스 인원이 꽉 찼습니다.')
-          return
+          return null
         }
+
         const result = await axios.patch(`${BASE_URL}/${groupId}`, {
           memberIds: [...groupData.memberIds, userId],
         })
         this.currentGroup = result.data
+
+        return true
       } catch (e) {
-        console.error(e)
-        return
+        alert('존재하지 않는 레이스입니다. 레이스 코드를 확인해주세요.')
+        return null
       }
     }, //joinGroup
 
@@ -108,6 +109,8 @@ export const useGroupStore = defineStore('group', {
         const response = await axios.get(`${BASE_URL}/${groupId}`)
         const groupData = response.data
         const updatedMemberIds = groupData.memberIds.filter((id) => id !== userId)
+
+        this.resetRunners()
 
         if (updatedMemberIds.length === 0) {
           await axios.delete(`${BASE_URL}/${groupId}`)
@@ -233,6 +236,16 @@ export const useGroupStore = defineStore('group', {
         }
       })
     }, //setRunners
+
+    // runners 배열 초기화 하는 method
+    resetRunners() {
+      this.runners = []
+      this.maxRunner = { name: '', amount: 0 }
+      this.minRunner = { name: '', amount: 0 }
+      this.displayMax = 0
+      this.displayMin = 0
+      this.limitPosition = 0
+    }, //resetRunners
 
     // runners의 모든 필드를 업데이트 하는 method
     getRunnersDetails(runnersExpenses, runnersInfo) {

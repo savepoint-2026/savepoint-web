@@ -113,7 +113,11 @@ const closePanel = () => {
 
 const onClickJoin = async () => {
   if (!joinCode.value || typeof groupStore.joinGroup !== 'function') return
-  await groupStore.joinGroup(userId, joinCode.value)
+  const result = await groupStore.joinGroup(userId, joinCode.value)
+  if (result == null) {
+    return
+  }
+
   const groupId = groupStore.currentGroup.id
   await userStore.updateGroupId(userId, groupId)
   await groupStore.loadGroup(groupId)
