@@ -113,7 +113,11 @@ const closePanel = () => {
 
 const onClickJoin = async () => {
   if (!joinCode.value || typeof groupStore.joinGroup !== 'function') return
-  await groupStore.joinGroup(userId, joinCode.value)
+  const result = await groupStore.joinGroup(userId, joinCode.value)
+  if (result == null) {
+    return
+  }
+
   const groupId = groupStore.currentGroup.id
   await userStore.updateGroupId(userId, groupId)
   await groupStore.loadGroup(groupId)
@@ -136,8 +140,8 @@ const onClickCreate = async () => {
   height: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
-  padding: 0 24px;
+  align-items: flex-start;
+  padding: 120px 24px 0;
   box-sizing: border-box;
 }
 
