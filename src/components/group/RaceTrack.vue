@@ -2,7 +2,7 @@
   <section class="race-track-wrap">
     <header class="race-header">
       <h2 class="fw-black text-black-1 header-title">
-        👑 이달의 거지왕: {{ groupStore.minRunner.name }} 👑
+        👑 이달의 거지왕: {{ groupStore.maxRunner.name }} 👑
       </h2>
 
       <div class="goal-box">
@@ -27,7 +27,11 @@
       <div class="lane-wrap">
         <div class="lane bg-black-3">
           <div class="lane-start-flag" aria-hidden="true"></div>
-          <div class="lane-limit" :style="{ left: `${groupStore.limitPosition}%` }">
+          <div
+            class="lane-limit"
+            :class="{ 'lane-limit-overflow': isLimitOverflow }"
+            :style="{ left: `${limitDisplayPosition}%` }"
+          >
             <span class="fw-bold lane-limit-label">
               LIMIT: {{ toWon(groupStore.currentGroup.targetAmount) }}
             </span>
@@ -47,7 +51,10 @@
               {{ toWon(group.runner.amount) }}
             </span>
             <div class="profileImg-wrap">
-              <div class="profileImg" :style="{ backgroundColor: getRunnerTone(group.runner.amount) }">
+              <div
+                class="profileImg"
+                :style="{ backgroundColor: getRunnerTone(group.runner.amount) }"
+              >
                 {{ group.runner.profileImg }}
               </div>
             </div>
@@ -111,7 +118,8 @@
 
         <span
           class="fw-bold text-black-4 limit-pill"
-          :style="{ left: `${groupStore.limitPosition}%` }"
+          :class="{ 'limit-pill-overflow': isLimitOverflow }"
+          :style="{ left: `${limitDisplayPosition}%` }"
         >
           LIMIT: {{ toWon(groupStore.currentGroup.targetAmount) }}
         </span>
@@ -179,12 +187,7 @@ const getRunnerTone = (amount) => {
 
 const getClusterOrbStyle = (amount, index, count) => {
   const limitedCount = Math.min(count, 3)
-  const offsets =
-    limitedCount === 2
-      ? [-18, 18]
-      : limitedCount === 3
-        ? [-24, 0, 24]
-        : [0]
+  const offsets = limitedCount === 2 ? [-18, 18] : limitedCount === 3 ? [-24, 0, 24] : [0]
 
   return {
     backgroundColor: getRunnerTone(amount),
@@ -192,6 +195,12 @@ const getClusterOrbStyle = (amount, index, count) => {
     zIndex: index + 1,
   }
 }
+
+const isLimitOverflow = computed(
+  () => groupStore.currentGroup.targetAmount > groupStore.displayMax && groupStore.displayMax > 0,
+)
+
+const limitDisplayPosition = computed(() => (isLimitOverflow.value ? 90 : groupStore.limitPosition))
 
 const groupedRunners = computed(() => {
   const sortedRunners = [...groupStore.runners].sort((a, b) => a.position - b.position)
@@ -374,9 +383,25 @@ const groupedRunners = computed(() => {
   width: 22px;
   border-radius: 999px 0 0 999px;
   background-image:
-    linear-gradient(45deg, var(--black-1) 25%, transparent 25%, transparent 75%, var(--black-1) 75%, var(--black-1)),
-    linear-gradient(45deg, var(--black-1) 25%, transparent 25%, transparent 75%, var(--black-1) 75%, var(--black-1));
-  background-position: 0 0, 6px 6px;
+    linear-gradient(
+      45deg,
+      var(--black-1) 25%,
+      transparent 25%,
+      transparent 75%,
+      var(--black-1) 75%,
+      var(--black-1)
+    ),
+    linear-gradient(
+      45deg,
+      var(--black-1) 25%,
+      transparent 25%,
+      transparent 75%,
+      var(--black-1) 75%,
+      var(--black-1)
+    );
+  background-position:
+    0 0,
+    6px 6px;
   background-size: 12px 12px;
   background-color: var(--black-4);
   opacity: 0.95;
@@ -402,6 +427,10 @@ const groupedRunners = computed(() => {
   border-left: 3px dashed var(--red-1);
   z-index: 1;
   pointer-events: none;
+}
+
+.lane-limit.lane-limit-overflow {
+  display: none;
 }
 
 .lane-limit-label {
@@ -439,6 +468,17 @@ const groupedRunners = computed(() => {
   border-left: 9px solid transparent;
   border-right: 9px solid transparent;
   border-bottom: 9px solid var(--red-1);
+}
+
+.limit-pill.limit-pill-overflow::before {
+  left: auto;
+  right: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-left: 13px solid var(--red-1);
+  border-right: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
 }
 
 .cluster-chip-row {

@@ -116,7 +116,7 @@ const onClickJoin = async () => {
   await groupStore.joinGroup(userId, joinCode.value)
   const groupId = groupStore.currentGroup.id
   await userStore.updateGroupId(userId, groupId)
-
+  await groupStore.loadGroup(groupId)
   closePanel()
 }
 
@@ -125,6 +125,7 @@ const onClickCreate = async () => {
   await groupStore.addGroup(userId, groupName.value, targetAmount.value)
   const groupId = groupStore.currentGroup.id
   await userStore.updateGroupId(userId, groupId)
+  await groupStore.loadGroup(groupId)
   closePanel()
 }
 </script>
