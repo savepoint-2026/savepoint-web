@@ -45,10 +45,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useTransactionStore } from '@/stores/useTransactionStore'
+import { useUserStore } from '@/stores/useUserStore'
 import axios from 'axios'
 import dayjs from 'dayjs'
 
 const store = useTransactionStore()
+const userStore = useUserStore()
 
 // 1. 월 이동
 const currentMonthText = computed(() => dayjs(store.selectedDate).format('YYYY년 M월'))
@@ -67,8 +69,10 @@ const nextMonth = () =>
 
 const updateMonth = (newDateObj) => {
   const newDateStr = newDateObj.format('YYYY-MM-DD')
+  const currentUserId = userStore.userData.id
+
   store.setSelectedDate(newDateStr)
-  store.fetchMonthlyTransactions('u1', newDateObj.year(), newDateObj.month() + 1)
+  store.fetchMonthlyTransactions(currentUserId, newDateObj.year(), newDateObj.month() + 1)
 }
 
 const handleMonthView = () => {
@@ -89,7 +93,9 @@ onMounted(async () => {
   // 현재 월 데이터 가져오기
   const year = dayjs(store.selectedDate).year()
   const month = dayjs(store.selectedDate).month() + 1
-  store.fetchMonthlyTransactions('u1', year, month)
+  const currentUserId = userStore.userData.id
+
+  store.fetchMonthlyTransactions(currentUserId, year, month)
 })
 
 // 유형(수입/지출/전체)에 따라 하위 카테고리 목록 동적 변경
