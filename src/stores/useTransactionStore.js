@@ -63,6 +63,64 @@ export const useTransactionStore = defineStore('transaction', {
         (tx) => dayjs(tx.date).format('YYYY-MM-DD') === state.selectedDate,
       )
     },
+
+    // 기간 데이터(rangeTransactions)를 월 단위로 집계
+    monthlyAggregation(state) {
+      const byMonth = new Map()
+
+      state.rangeTransactions.forEach((tx) => {
+        const monthKey = String(tx.date).slice(0, 7)
+        const amount = Number(tx.amount || 0)
+
+        if (!byMonth.has(monthKey)) {
+          byMonth.set(monthKey, {
+            income: 0,
+            expense: 0,
+            expenseByCategory: new Map(),
+          })
+        }
+
+        const monthData = byMonth.get(monthKey)
+        if (tx.type === 'income') {
+          monthData.income += amount
+          return
+        }
+
+        if (tx.type === 'expense') {
+          monthData.expense += amount
+
+          if (tx.categoryId) {
+            const prevAmount = monthData.expenseByCategory.get(tx.categoryId) ?? 0
+            monthData.expenseByCategory.set(tx.categoryId, prevAmount + amount)
+          }
+        }
+      })
+
+      return byMonth
+    },
+
+    // 기준 월(baseMonthKey) 기준 최근 3개월 통계
+    getThreeMonthStats() {
+      return (baseMonthKey) => {
+        if (!baseMonthKey) return []
+
+        return [2, 1, 0].map((diff) => {
+          const targetDate = dayjs(`${baseMonthKey}-01`).subtract(diff, 'month')
+          const monthKey = targetDate.format('YYYY-MM')
+          const monthData = this.monthlyAggregation.get(monthKey)
+          const income = monthData?.income ?? 0
+          const expense = monthData?.expense ?? 0
+
+          return {
+            monthKey,
+            label: `${targetDate.month() + 1}월`,
+            income,
+            expense,
+            net: income - expense,
+          }
+        })
+      }
+    },
   },
 
   actions: {

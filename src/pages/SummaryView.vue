@@ -142,7 +142,6 @@ const highlightedCategoryId = ref(null)
 const tooltipPosition = ref({ x: 0, y: 0 })
 
 const parseMonthKey = (dateString) => String(dateString).slice(0, 7)
-const shortMonthLabel = (monthKey) => `${Number(monthKey.split('-')[1])}월`
 
 const shiftMonthKey = (monthKey, diff) => {
   const [year, month] = monthKey.split('-').map(Number)
@@ -164,59 +163,12 @@ const latestRangeMonthKey = computed(() => {
   }, parseMonthKey(transactions.value[0].date))
 })
 
-const monthlyAggregation = computed(() => {
-  const byMonth = new Map()
-
-  transactions.value.forEach((tx) => {
-    const monthKey = parseMonthKey(tx.date)
-    const amount = Number(tx.amount || 0)
-
-    if (!byMonth.has(monthKey)) {
-      byMonth.set(monthKey, {
-        income: 0,
-        expense: 0,
-        expenseByCategory: new Map(),
-      })
-    }
-
-    const monthData = byMonth.get(monthKey)
-    if (tx.type === 'income') {
-      monthData.income += amount
-      return
-    }
-
-    if (tx.type === 'expense') {
-      monthData.expense += amount
-
-      if (tx.categoryId) {
-        const prevAmount = monthData.expenseByCategory.get(tx.categoryId) ?? 0
-        monthData.expenseByCategory.set(tx.categoryId, prevAmount + amount)
-      }
-    }
-  })
-
-  return byMonth
-})
+const monthlyAggregation = computed(() => transactionStore.monthlyAggregation)
 
 // 선택된 월을 기준으로 최근 3개월의 수입/지출/순이익 통계
-const recentThreeMonthStats = computed(() => {
-  if (!selectedMonthKey.value) return []
-
-  return [2, 1, 0].map((diff) => {
-    const monthKey = shiftMonthKey(selectedMonthKey.value, -diff)
-    const monthData = monthlyAggregation.value.get(monthKey)
-    const income = monthData?.income ?? 0
-    const expense = monthData?.expense ?? 0
-
-    return {
-      monthKey,
-      label: shortMonthLabel(monthKey),
-      income,
-      expense,
-      net: income - expense,
-    }
-  })
-})
+const recentThreeMonthStats = computed(() =>
+  transactionStore.getThreeMonthStats(selectedMonthKey.value),
+)
 
 const monthlySummaryCards = computed(() =>
   recentThreeMonthStats.value.map((item, index, array) => ({
