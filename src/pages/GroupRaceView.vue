@@ -31,9 +31,17 @@ const transactionStore = useTransactionStore()
 const isLoading = ref(true)
 
 onMounted(async () => {
+  await userStore.fetchUserData(AuthStore.currentUserId)
+  if (
+    !userStore.userData.groupId ||
+    userStore.userData.groupId === 'empty' ||
+    userStore.userData.groupId === ''
+  ) {
+    isLoading.value = false
+    return
+  }
   try {
     //data loading
-    await userStore.fetchUserData(AuthStore.currentUserId)
     const groupId = userStore.userData.groupId
     await groupStore.loadGroup(groupId)
     const memberIds = groupStore.currentGroup.memberIds
