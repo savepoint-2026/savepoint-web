@@ -2,11 +2,11 @@
   <section class="race-track-wrap">
     <header class="race-header">
       <h2 class="fw-black text-black-1 header-title">
-        👑 이달의 거지왕: {{ groupStore.maxRunner.name }} 👑
+        👑 이달의 거지왕: {{ groupStore.minRunner.name }} 👑
       </h2>
 
       <div class="goal-box">
-        <p class="fw-bold text-black-2 goal-label">그룹 코드 {{ groupStore.currentGroup.id }}</p>
+        <p class="fw-bold text-black-2 goal-label">그룹 코드 : {{ groupStore.currentGroup.id }}</p>
         <p class="fw-black text-red-1 goal-amount">
           {{ toWon(groupStore.currentGroup.targetAmount) }}
         </p>
@@ -25,30 +25,90 @@
       </div>
 
       <div class="lane-wrap">
-        <div class="lane bg-black-3"></div>
-        <div
-          v-for="runner in groupStore.runners"
-          :key="runner.userId"
-          class="runner"
-          :style="{ left: `${runner.position}%` }"
-        >
-          <span class="fw-bold value-chip" :class="runner.danger ? 'chip-danger' : 'chip-normal'">
-            {{ toWon(runner.amount) }}
-          </span>
-          <div class="profileImg-wrap">
-            <div class="profileImg">{{ runner.profileImg }}</div>
-            <img
-              class="status-icon"
-              :src="runner.amount > groupStore.currentGroup.targetAmount ? SkullIcon : SmileIcon"
-              alt=""
-            />
+        <div class="lane bg-black-3">
+          <div class="lane-start-flag" aria-hidden="true"></div>
+          <div class="lane-limit" :style="{ left: `${groupStore.limitPosition}%` }">
+            <span class="fw-bold lane-limit-label">
+              LIMIT: {{ toWon(groupStore.currentGroup.targetAmount) }}
+            </span>
           </div>
-          <p class="fw-bold text-black-1 runner-name" :class="{ 'text-red-1': runner.danger }">
-            {{ runner.name }}
-          </p>
+        </div>
+        <div
+          v-for="group in groupedRunners"
+          :key="group.key"
+          class="runner"
+          :style="{ left: `${group.position}%` }"
+        >
+          <template v-if="group.count === 1">
+            <span
+              class="fw-bold value-chip"
+              :class="group.runner.danger ? 'chip-danger' : 'chip-normal'"
+            >
+              {{ toWon(group.runner.amount) }}
+            </span>
+            <div class="profileImg-wrap">
+              <div class="profileImg" :style="{ backgroundColor: getRunnerTone(group.runner.amount) }">
+                {{ group.runner.profileImg }}
+              </div>
+            </div>
+            <p
+              class="fw-bold runner-name"
+              :style="{ color: group.runner.danger ? 'var(--red-1)' : 'var(--black-1)' }"
+            >
+              {{ group.runner.name }}
+            </p>
+            <div class="status-icon-wrap">
+              <img
+                class="status-icon"
+                :src="
+                  group.runner.amount > groupStore.currentGroup.targetAmount ? SkullIcon : SmileIcon
+                "
+                alt=""
+              />
+            </div>
+          </template>
+
+          <template v-else>
+            <div class="cluster-chip-row">
+              <span
+                v-for="member in group.runners"
+                :key="`${member.userId}-chip`"
+                class="fw-bold value-chip"
+                :class="member.danger ? 'chip-danger' : 'chip-normal'"
+              >
+                {{ toWon(member.amount) }}
+              </span>
+            </div>
+
+            <div class="cluster-stack">
+              <div
+                v-for="(member, idx) in group.runners.slice(0, 3)"
+                :key="`${member.userId}-bubble`"
+                class="cluster-orb"
+                :style="getClusterOrbStyle(member.amount, idx, group.count)"
+              >
+                <div
+                  class="cluster-orb-inner"
+                  :style="{ backgroundColor: getRunnerTone(member.amount) }"
+                >
+                  {{ member.profileImg }}
+                </div>
+              </div>
+            </div>
+
+            <div class="cluster-names">
+              <span
+                v-for="member in group.runners"
+                :key="`${member.userId}-name`"
+                class="fw-bold cluster-name"
+                :style="{ color: member.danger ? 'var(--red-1)' : 'var(--black-1)' }"
+              >
+                {{ member.name }}
+              </span>
+            </div>
+          </template>
         </div>
 
-        <div class="limit-line" :style="{ left: `${groupStore.limitPosition}%` }"></div>
         <span
           class="fw-bold text-black-4 limit-pill"
           :style="{ left: `${groupStore.limitPosition}%` }"
@@ -65,11 +125,11 @@
       <div class="legend bg-yellow-2">
         <div class="legend-item">
           <img :src="SmileIcon" width="15" height="15" alt="safe" />
-          <span class="fw-medium text-black-1">안전 구역 (거지왕 후보)</span>
+          <span class="fw-medium text-black-1">안전 뱃지 (거지왕 후보)</span>
         </div>
         <div class="legend-item">
           <img :src="SkullIcon" width="15" height="15" alt="danger" />
-          <span class="fw-medium text-black-1">파산 구역 (과소비 경고)</span>
+          <span class="fw-medium text-black-1">파산 뱃지 (과소비 경고)</span>
         </div>
       </div>
     </article>
@@ -77,6 +137,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import SkullIcon from '@/assets/icons/group/group-skull.png'
 import SmileIcon from '@/assets/icons/group/group-smile.png'
 import { useAuthStore } from '@/stores/useAuthStore'
@@ -86,6 +147,7 @@ import { useUserStore } from '@/stores/useUserStore'
 const authStore = useAuthStore()
 const groupStore = useGroupStore()
 const userStore = useUserStore()
+const overlapThreshold = 8
 
 // 금액을 원 단위로 포맷팅하는 method
 const toWon = (value) => `${value.toLocaleString('ko-KR')} 원`
@@ -102,6 +164,67 @@ const onClickLeaveGroup = async () => {
   await groupStore.leaveGroup(userId, groupId)
   await userStore.updateGroupId(userId, '')
 }
+
+const getRunnerTone = (amount) => {
+  const min = groupStore.displayMin
+  const limit = groupStore.currentGroup.targetAmount
+
+  if (amount >= limit) return 'var(--orange-1)'
+
+  const ratio = limit === min ? 0 : (amount - min) / (limit - min)
+  if (ratio >= 0.75) return 'var(--yellow-1)'
+  if (ratio >= 0.5) return 'var(--yellow-2)'
+  return 'var(--green-2)'
+}
+
+const getClusterOrbStyle = (amount, index, count) => {
+  const limitedCount = Math.min(count, 3)
+  const offsets =
+    limitedCount === 2
+      ? [-18, 18]
+      : limitedCount === 3
+        ? [-24, 0, 24]
+        : [0]
+
+  return {
+    backgroundColor: getRunnerTone(amount),
+    transform: `translateX(${offsets[index] ?? 0}px)`,
+    zIndex: index + 1,
+  }
+}
+
+const groupedRunners = computed(() => {
+  const sortedRunners = [...groupStore.runners].sort((a, b) => a.position - b.position)
+  const groups = []
+  let currentGroup = []
+
+  for (const runner of sortedRunners) {
+    if (currentGroup.length === 0) {
+      currentGroup.push(runner)
+      continue
+    }
+
+    const lastRunner = currentGroup[currentGroup.length - 1]
+    if (Math.abs(runner.position - lastRunner.position) < overlapThreshold) {
+      currentGroup.push(runner)
+    } else {
+      groups.push(currentGroup)
+      currentGroup = [runner]
+    }
+  }
+
+  if (currentGroup.length) {
+    groups.push(currentGroup)
+  }
+
+  return groups.map((group) => ({
+    key: group.map((runner) => runner.userId).join('-'),
+    count: group.length,
+    position: group.reduce((sum, runner) => sum + runner.position, 0) / group.length,
+    runners: group,
+    runner: group[0],
+  }))
+})
 </script>
 
 <style scoped>
@@ -124,11 +247,21 @@ const onClickLeaveGroup = async () => {
   width: fit-content;
 }
 .status-icon {
-  position: absolute;
-  right: 0px;
-  bottom: 16px;
   width: 16px;
   height: 16px;
+}
+
+.status-icon-wrap {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  bottom: 18px;
+  left: 45px;
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .header-title {
@@ -226,19 +359,93 @@ const onClickLeaveGroup = async () => {
 }
 
 .lane {
+  position: relative;
   width: 100%;
   height: 46px;
   border-radius: 999px;
+  overflow: hidden;
+}
+
+.lane-start-flag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 22px;
+  border-radius: 999px 0 0 999px;
+  background-image:
+    linear-gradient(45deg, var(--black-1) 25%, transparent 25%, transparent 75%, var(--black-1) 75%, var(--black-1)),
+    linear-gradient(45deg, var(--black-1) 25%, transparent 25%, transparent 75%, var(--black-1) 75%, var(--black-1));
+  background-position: 0 0, 6px 6px;
+  background-size: 12px 12px;
+  background-color: var(--black-4);
+  opacity: 0.95;
+  z-index: 1;
 }
 
 .runner {
   position: absolute;
   top: 0;
   transform: translateX(-50%);
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
+}
+
+.lane-limit {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  transform: translateX(-50%);
+  border-left: 3px dashed var(--red-1);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.lane-limit-label {
+  position: absolute;
+  left: 50%;
+  bottom: -28px;
+  transform: translateX(-50%);
+  color: var(--red-1);
+  font-size: 10px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.limit-pill {
+  position: absolute;
+  bottom: -34px;
+  transform: translateX(-50%);
+  background-color: var(--red-1);
+  color: var(--black-4);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 10px;
+  white-space: nowrap;
+  z-index: 3;
+}
+
+.limit-pill::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -9px;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-bottom: 9px solid var(--red-1);
+}
+
+.cluster-chip-row {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: nowrap;
 }
 
 .value-chip {
@@ -259,10 +466,9 @@ const onClickLeaveGroup = async () => {
 }
 
 .profileImg {
-  width: 48px;
-  height: 48px;
+  width: 60px;
+  height: 60px;
   border-radius: 999px;
-  background-color: var(--black-3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -274,25 +480,49 @@ const onClickLeaveGroup = async () => {
   font-size: 12px;
 }
 
-.limit-line {
-  position: absolute;
-  top: 20px;
-  bottom: 18px;
-  width: 3px;
-  background-color: var(--red-1);
-  border-radius: 999px;
-  transform: translateX(-50%);
+.cluster-stack {
+  position: relative;
+  width: 92px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.limit-pill {
+.cluster-orb {
   position: absolute;
-  bottom: 0;
-  transform: translateX(-50%);
-  background-color: var(--red-1);
-  color: var(--black-4);
+  width: 60px;
+  height: 60px;
   border-radius: 999px;
-  padding: 4px 9px;
-  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(23, 25, 28, 0.08);
+}
+
+.cluster-orb-inner {
+  width: 38px;
+  height: 38px;
+  background-color: white;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.cluster-names {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  max-width: 110px;
+  text-align: center;
+  line-height: 1.25;
+}
+
+.cluster-name {
+  font-size: 12px;
 }
 
 .scale-row {
